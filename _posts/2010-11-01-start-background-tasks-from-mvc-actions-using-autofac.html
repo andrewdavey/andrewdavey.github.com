@@ -21,7 +21,7 @@ starting it.</p>
 <h2>Code time</h2>
 <p>To allow controller actions to start background tasks, I will pass an 
 instance of the following interface into the controller via the constructor.</p>
-<code><pre>
+<code><pre class="csharp">
 public interface IAsyncRunner
 {
     void Run<T>(Action<T> action);
@@ -30,7 +30,7 @@ public interface IAsyncRunner
 <p>Remember, I'm using Autofac to create my controllers. So the constructor 
 parameters are resolved from the container. An example controller looks like
 this:</p>
-<code><pre>
+<code><pre class="csharp">
 public class HomeController : Controller {
     public HomeController(IAsyncRunner async) {
         this.async = async;
@@ -40,7 +40,7 @@ public class HomeController : Controller {
 </pre></code>
 <p>For this example, imagine we want to do heavy image processing in response 
 to a file being uploaded. Our action method will be:</p>
-<code><pre>
+<code><pre class="csharp">
 public ActionResult UploadImage(HttpPostedFileBase image) {
     image.SaveAs("example.jpg");
     async.Run<ImageResizer>(resizer => resizer.Resize("example.jpg"));
@@ -57,7 +57,7 @@ user.</p>
 <h2>The AsyncRunner</h2>
 <p>Let's move onto to the actual AsyncRunner implementation. I'm using Autofac,
 but the code could be adapted for use with any IoC container.</p>
-<code><pre>
+<code><pre class="csharp">
 public class AsyncRunner : IAsyncRunner
 {
     public void Run<T>(Action<T> action)
