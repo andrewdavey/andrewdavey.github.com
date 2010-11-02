@@ -24,7 +24,7 @@ instance of the following interface into the controller via the constructor.</p>
 <code><pre class="csharp">
 public interface IAsyncRunner
 {
-    void Run<T>(Action<T> action);
+    void Run&lt;T&gt;(Action&lt;T&gt; action);
 }
 </pre></code>
 <p>Remember, I'm using Autofac to create my controllers. So the constructor 
@@ -43,7 +43,7 @@ to a file being uploaded. Our action method will be:</p>
 <code><pre class="csharp">
 public ActionResult UploadImage(HttpPostedFileBase image) {
     image.SaveAs("example.jpg");
-    async.Run<ImageResizer>(resizer => resizer.Resize("example.jpg"));
+    async.Run&lt;ImageResizer&gt;(resizer => resizer.Resize("example.jpg"));
     return RedirectToAction("UploadFinished");
 }
 </pre></code>
@@ -60,7 +60,7 @@ but the code could be adapted for use with any IoC container.</p>
 <code><pre class="csharp">
 public class AsyncRunner : IAsyncRunner
 {
-    public void Run<T>(Action<T> action)
+    public void Run&lt;T&gt;(Action&lt;T&gt; action)
     {
         var app = GetApplicationContainer();
         Task.Factory.StartNew(delegate
@@ -69,7 +69,7 @@ public class AsyncRunner : IAsyncRunner
             // registrations as set for HTTP request scopes.
             using (var container = app.BeginLifetimeScope(WebLifetime.Request))
             {
-                var service = container.Resolve<T>();
+                var service = container.Resolve&lt;T&gt;();
                 action(service);
             }
         });
