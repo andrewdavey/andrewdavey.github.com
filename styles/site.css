@@ -1,0 +1,19 @@
+html {
+    background-color: #f8f8f8;
+    color: #222;
+}
+
+h1 {
+    color: #444;
+    font-family: "Segeo UI", Arial, sans-serif;
+    font-weight: normal;
+}
+
+h2 {
+    font-family: "Segeo UI", Arial, sans-serif;
+    color: #333;
+}
+
+p {
+    width: 36em
+}
