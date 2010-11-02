@@ -1,0 +1,95 @@
+---
+layout: default
+title: Start background tasks from MVC actions using Autofac
+---
+<p>This post is for people who know about ASP.NET MVC and IoC containers.</p>
+<h2>Preamble</h2>
+<p>Your MVC actions should be quick to return a response to the user. Any long
+running task should be run on a background thread. This reduces the chance of 
+your web server becoming unresponsive.</p>
+<p>I'm using <a href="http://code.google.com/p/autofac">Autofac</a> as my IoC container in ASP.NET MVC projects. In addition to an application wide, global 
+container, Autofac provides a "http request scoped" container for each web 
+request. This means we can declare dependencies such as database connections 
+to be "HTTP Request Scoped". Each request gets its own instance. At the end of 
+the request, Autofac knows to dispose of any disposable objects.</p>
+<p>This works very well, until you don't have an HTTP request to work within. 
+Which is what happens when running some code on a background thread.</p>
+<p>So we need a way to start our background task from a controller action
+method, but give it a <em>new</em> request-style context. It will not have an
+actual HTTP context. We'll pass any required information to the task when 
+starting it.</p>
+<h2>Code time</h2>
+<p>To allow controller actions to start background tasks, I will pass an 
+instance of the following interface into the controller via the constructor.</p>
+<code><pre>
+public interface IAsyncRunner
+{
+    void Run<T>(Action<T> action);
+}
+</pre></code>
+<p>Remember, I'm using Autofac to create my controllers. So the constructor 
+parameters are resolved from the container. An example controller looks like
+this:</p>
+<code><pre>
+public class HomeController : Controller {
+    public HomeController(IAsyncRunner async) {
+        this.async = async;
+    }
+    readonly IAsyncRunner async;
+}
+</pre></code>
+<p>For this example, imagine we want to do heavy image processing in response 
+to a file being uploaded. Our action method will be:</p>
+<code><pre>
+public ActionResult UploadImage(HttpPostedFileBase image) {
+    image.SaveAs("example.jpg");
+    async.Run<ImageResizer>(resizer => resizer.Resize("example.jpg"));
+    return RedirectToAction("UploadFinished");
+}
+</pre></code>
+<p>That's a nice short method, but let's analyse the details.</p>
+<p>First, we synchronously write the raw image data to disk. Then we call then 
+async runner's Run method. We provide the type of the object to be invoked and 
+a delegate to run. The async runner will start a new 
+background task, create an ImageResizer object and call the given delegate.</p>
+<p>In the meantime the action method is free to return a response to the 
+user.</p>
+<h2>The AsyncRunner</h2>
+<p>Let's move onto to the actual AsyncRunner implementation. I'm using Autofac,
+but the code could be adapted for use with any IoC container.</p>
+<code><pre>
+public class AsyncRunner : IAsyncRunner
+{
+    public void Run<T>(Action<T> action)
+    {
+        var app = GetApplicationContainer();
+        Task.Factory.StartNew(delegate
+        {
+            // Create a nested container which will use the same dependency
+            // registrations as set for HTTP request scopes.
+            using (var container = app.BeginLifetimeScope(WebLifetime.Request))
+            {
+                var service = container.Resolve<T>();
+                action(service);
+            }
+        });
+    }
+
+    IContainer GetApplicationContainer()
+    {
+        // Use Autofac's ASP.NET integration to get the application-wide
+        // container that exists in the ApplicationInstance.
+        // See the Autofac documentation for more about this.
+        var accessor = ((IContainerProviderAccessor)HttpContext.Current.ApplicationInstance);
+        return accessor.ContainerProvider.ApplicationContainer;
+    }
+}
+</pre></code>
+<p>The AsyncRunner uses Autofac to create an instance of the requested type T.
+This happens inside a new "lifetime scope". By using Autofac to create the 
+object, that object can also declare dependencies to be provided by the 
+container.</p>
+<p>The .NET 4.0 Task Parallel Library is used to start a new task to run 
+within, rather than worry about creating threads manually.</p>
+<p>The end result is a clean way to start asynchronous tasks, whilst still 
+being able to use Autofac's excellent features.</p>
