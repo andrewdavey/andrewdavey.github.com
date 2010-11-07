@@ -3,17 +3,51 @@ html {
     color: #222;
 }
 
-h1 {
-    color: #444;
+#header {
+    background-color: #f0f0f0;
+    color: #b0b0b0;
     font-family: "Segeo UI", Arial, sans-serif;
-    font-weight: normal;
+    margin-bottom: .5em;
+    padding: 1em;
 }
 
-h2 {
-    font-family: "Segeo UI", Arial, sans-serif;
-    color: #333;
+#header .title {
+    font-size: 2.5em;
 }
 
-p {
-    width: 36em
+#content {
+  padding: 0 1em;
+}
+
+#content h1 {
+  font-family: "Segeo UI", Arial, sans-serif;
+  font-size: 2em;
+  color: #777;
+  margin-top: .5em;
+  margin-bottom: .3em;
+}
+
+#content h2 {
+  background-color: #efefef;
+    font-family: "Segeo UI", Arial, sans-serif;
+    color: #555;
+    font-size: 1.9em;
+    margin-top: 1em;
+    margin-bottom: .3em;
+    padding: .1em;
+}
+
+#content p {
+    width: 36em;
+    font-size: 1.3em;
+    margin-bottom: .7em;
+}
+
+#content ul {
+  font-size: 1.3em;
+  margin-bottom: .7em;
+}
+
+a {
+  color: #5181E8;
 }
