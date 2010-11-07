@@ -23,9 +23,9 @@ going to run inside a virtual directory, not at the root.</p>
 <code><pre>&lt;a href="&lt;%: Url.Content("~/content/foo.html") %&gt;"&gt;foo&lt;/a&gt;</pre></code>
 </p>
 <p>That works, but I think the intent could be clearer.</p>
-<p>Why can't we just type:<br/>
+<p>Why can't we just type:</p>
 <code><pre>&lt;a href="~/content/foo.html"&gt;foo&lt;/a&gt;</pre></code>
-<br/>
+<p>
 and establish a convention that all URLs in the HTML that start with a "~"
 need to be expanded into their absolute form?
 </p>

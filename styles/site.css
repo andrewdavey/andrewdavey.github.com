@@ -43,6 +43,10 @@ html {
     margin-bottom: .7em;
 }
 
+#content pre {
+    margin-bottom: .7em;
+}
+
 #content ul, #content ol, #content dl {
   font-size: 1.3em;
   margin-bottom: .7em;
