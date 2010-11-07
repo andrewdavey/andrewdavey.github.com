@@ -9,10 +9,16 @@ html {
     font-family: "Segeo UI", Arial, sans-serif;
     margin-bottom: .5em;
     padding: 1em;
+    border-bottom: solid 2px #e0e0e0;
 }
 
 #header .title {
     font-size: 2.5em;
+    margin-bottom: .3em;
+}
+
+#header a {
+  color: #999;
 }
 
 #content {
