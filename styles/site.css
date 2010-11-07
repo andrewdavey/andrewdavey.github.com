@@ -1,6 +1,6 @@
 html {
     background-color: #f8f8f8;
-    color: #222;
+    color: #444;
 }
 
 #header {
@@ -43,9 +43,13 @@ html {
     margin-bottom: .7em;
 }
 
-#content ul {
+#content ul, #content ol, #content dl {
   font-size: 1.3em;
   margin-bottom: .7em;
+}
+
+#content dd {
+  margin-bottom: .5em;
 }
 
 a {
