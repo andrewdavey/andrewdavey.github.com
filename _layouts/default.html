@@ -10,7 +10,7 @@
   <body>
     <div id="header">
       <h1 class="title">aboutcode.net - a blog by Andrew Davey</h1>
-      <div>Send tweets to <a href="http://twitter.com/andrewdavey">@andrewdavey</a>.
+      <div>Follow <a href="http://twitter.com/andrewdavey">@andrewdavey</a>.
         Email <a href="mailto:andrew@equin.co.uk">andrew@equin.co.uk</a>.
         Fork me on <a href="http://github.com/andrewdavey">GitHub</a>.
       </div>
@@ -19,6 +19,13 @@
       {{ content }}
     </div>
   </body>
+  <script src="http://ajax.microsoft.com/ajax/jquery/jquery-1.4.2.min.js" type="text/javascript"></script>
+  <script src="/scripts/site.js" type="text/javascript"></script>
+  <script type="text/javascript">
+  $(function() {
+    $("#opensource-projects").loadRepositories("andrewdavey");
+  });
+  </script>
   <script src="/scripts/shCore.js" type="text/javascript"></script>
   <script src="/scripts/shBrushCSharp.js" type="text/javascript"></script>
   <script type="text/javascript">
