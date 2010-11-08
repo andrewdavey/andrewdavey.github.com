@@ -1,0 +1,89 @@
+---
+layout: post
+title: Nested layout pages in Razor
+---
+<p>This post is for people using the Razor view engine in ASP.NET MVC3.</p>
+<h2>Preamble</h2>
+<p>
+In any reasonably sized website you will want to use layout pages for the common header 
+and footer parts of HTML. Razor makes this easy and the syntax is elegant (especially
+when compared to the old webforms view engine). However, on more complex websites there
+is often a need to nest layouts.
+</p>
+<p>
+Consider a web application that has some common scripts and styles across all pages, but
+a number of "areas" that have their own HTML structure. For example, a "public" area, an
+"admin" area and a "customer" area. We'd like to define a layout for the top-level HTML,
+stylesheets and scripts. Then define layouts for each area and have them inherit from 
+the top-level layout.
+</p>
+<h2>Nested Layouts</h2>
+<p>
+The top-level layout looks like a regular Razor layout. Let's create a file:<br/>
+<samp>~/Views/Shared/_site.cshtml</samp>
+</p>
+<code><pre class="brush: xml">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;@View.Title&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  @RenderBody()
+  &lt;p&gt;Copyright Me 2010&lt;/p&gt;
+  &lt;script type="text/javascript" src="/scripts/jquery.js"&gt;&lt;/script&gt;
+  @RenderSection("scripts", required: false)
+&lt;/body&gt;
+&lt;/html&gt;
+</pre></code>
+<p>Note that this top-level layout defines where it's inner content will go (RenderBody) 
+and also has an optional "scripts" section. Pages using this layout will be able to 
+specify the extra scripts they need in that section.</p>
+<p>For each area, we can now create a nested layout page. For example, in the "Public" 
+area we'll create a file:<br/>
+<samp>~/Areas/Public/Views/Shared/_public.cshtml</samp></p>
+<code><pre class="brush: xml">@{ Layout = "~/Views/Shared/_site.cshtml"; }
+&lt;div id="public"&gt;
+  &lt;p&gt;public header&lt;/p&gt;
+  @RenderBody()
+  &lt;p&gt;public footer&lt;/p&gt;
+&lt;/div&gt;
+@section scripts {
+  &lt;script type="text/javascript" src="/scripts/public.js"&gt;&lt;script&gt;
+  @RenderSection("scripts", required: false)
+}
+</pre></code>
+<p>This nested layout inherits from the top-level layout. It adds some HTML common to all
+pages in the public area and defines where the page content will go (RenderBody).</p>
+<p>It also has to redefine the scripts section. 
+This has to be there even when not actually adding any HTML to the 
+section, otherwise content pages will not be able to add to the section. This is just 
+like nested master pages in webforms using ContentPlaceholders.</p>
+<p>A view in the public area will look like this:</p>
+<code><pre class="brush: xml">@{
+  Layout = "~/Areas/Public/Views/Home/Index.cshtml";
+  View.Title = "Home Page";
+}
+&lt;p&gt;Welcome to my public website!&lt;/p&gt;
+</pre></code>
+<h2>End Result</h2>
+<p>When the home page view is rendered the top-level and area-level layouts are nested
+correctly. The output will look like this:</p>
+<code><pre class="brush: xml">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Home Page&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id="public"&gt;
+    &lt;p&gt;public header&lt;/p&gt;
+    &lt;p&gt;Welcome to my public website!&lt;/p&gt;
+    &lt;p&gt;public footer&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;p&gt;Copyright Me 2010&lt;/p&gt;
+  &lt;script type="text/javascript" src="/scripts/jquery.js"&gt;&lt;/script&gt;
+  &lt;script type="text/javascript" src="/scripts/public.js"&gt;&lt;script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre></code>
