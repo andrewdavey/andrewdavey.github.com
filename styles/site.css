@@ -3,18 +3,40 @@ html {
     color: #444;
 }
 
+body {
+  font-family: Georgia, "Times New Roman", Serif;
+  padding: 0 2em;
+}
+
 #header {
-    background-color: #f0f0f0;
-    color: #b0b0b0;
-    font-family: "Segeo UI", Arial, sans-serif;
-    margin-bottom: .5em;
-    padding: 1em;
-    border-bottom: solid 1px #e0e0e0;
+  margin-bottom: 1em;
+  padding: 1em 0;
+  border-bottom: solid 1px #354c69;
+  position: relative;
 }
 
 #header .title {
-    font-size: 2.5em;
-    margin-bottom: .3em;
+  font-size: 3em;
+  color: #354c69;
+  width: 6em;
+  text-align: right;
+}
+
+#header .subtitle {
+  color: #525252;
+  font-size: 1.2em;
+  width: 15.74em;
+  text-align: right;
+}
+
+#header .contact {
+  color: #999;
+  font-size: 1em;
+  position: absolute;
+  top: 1.9em;
+  left: 23em;
+  width: 30em;
+  line-height: 1.4em;
 }
 
 #header a {
@@ -22,7 +44,35 @@ html {
 }
 
 #content {
-  padding: 0 1em;
+  padding: 1em 1em 0 1em;
+  font-size: 1.5em;
+  display: table;
+}
+
+#content .section {
+  display: table-row;
+}
+
+#content .section-header, #content .section-content {
+  display: table-cell;
+  padding-bottom: 2em;
+}
+
+#content .section-header {
+  width: 11.5em;
+  text-align: right;
+  padding-right: 2.8em;
+}
+
+#content .section-header p {
+  font-size: .8em;
+  color: #888;
+  padding-left: 1.5em;
+  line-height: 1.5em;
+}
+
+#content .section-content {
+  width: 30em;
 }
 
 #content h1 {
@@ -34,34 +84,30 @@ html {
 }
 
 #content h2 {
-  background-color: #efefef;
-    font-family: "Segeo UI", Arial, sans-serif;
-    color: #555;
-    font-size: 1.9em;
-    margin-top: 1em;
-    margin-bottom: .3em;
-    padding: .1em;
+  color: #8d4e0a;
+  font-style: italic;
 }
 
 #content p {
-    width: 36em;
-    font-size: 1.3em;
-    margin-bottom: .7em;
+  margin-bottom: .7em;
 }
 
 #content pre {
-    margin-bottom: .7em;
+  margin-bottom: .7em;
 }
 
 #content ul, #content ol, #content dl {
-  font-size: 1.3em;
   margin-bottom: .7em;
+}
+
+#content li {
+  margin-bottom: .5em;
 }
 
 #content dd {
   margin-bottom: .5em;
 }
 
-a {
-  color: #5181E8;
+#content a {
+  color: #354c69;
 }
