@@ -1,0 +1,68 @@
+---
+layout: post
+title: List GitHub projects using JavaScript
+---
+<p>Do you use GitHub? Got a blog/website? Then read on for a handy bit of JavaScrpt.</p>
+<h2>Preamble</h2>
+<p><a href="http://github.com">GitHub</a> is simply fantastic. If you're into open source then it
+really is the place to host your work. Heck, I even use it for private projects as well.
+</p>
+<p>If you have some kind of blog or personal website why not promote and show-off your projects?
+It exactly what I'm doing here, just look at my <a href="/">home page</a>.</p>
+<p>The list of projects is generated using some simple JavaScript. Read on to get the code.</p>
+
+<h2>Get the code</h2>
+<p>Before I go further, I must say that I originally copied this code from <a href="http://jointheconversation.org/">jointheconversation.org</a>. However, I've made enough changes that I think it's worth posting here to share the love.</p>
+<p>In your HTML add a <samp>&lt;div&gt;</samp> with an ID. The list of projects will be inserted
+here.</p>
+<code><pre class="brush: xml">&lt;html&gt;
+  ...
+  &lt;div id="github-projects"&gt;&lt;/div&gt;
+  ...
+&lt;/html&gt;</pre></code>
+<p>Next, just before <samp>&lt;/body&gt;</samp>, add these scripts.</p>
+<code><pre class="brush: xml">
+&lt;script src="http://ajax.microsoft.com/ajax/jquery/jquery-1.4.2.min.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script src="/scripts/github.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+  $(function() {
+    $("#github-projects").loadRepositories("andrewdavey");
+  });
+&lt/script&gt;
+</pre></code>
+<p>Feel free to load jQuery from where you usually do. I just happen to like using a CDN.</p>
+<p>Make sure you replace "andrewdavey" with whatever github username you want to display
+projects for.</p>
+<p>Finally, create the <samp>/scripts/github.js</samp> file. Here comes the magic.</p>
+<code><pre class="brush: js">jQuery.githubUser = function(username, callback) {
+  jQuery.getJSON("http://github.com/api/v1/json/" + username + "?callback=?", callback);
+}
+
+jQuery.fn.loadRepositories = function(username) {
+  this.html("&lt;span&gt;Querying GitHub for repositories...&lt;/span&gt;");
+
+  var target = this; 
+  $.githubUser(username, function(data) {
+    var repos = data.user.repositories;
+    sortByNumberOfWatchers(repos);
+
+    var list = $('&lt;dl/&gt;');
+    target.empty().append(list);
+    $(repos).each(function() {
+      list.append('&lt;dt&gt;&lt;a href="'+ this.url +'"&gt;' + this.name + '&lt;/a&gt;&lt;/dt&gt;');
+      list.append('&lt;dd&gt;' + this.description + '&lt;/dd&gt;');
+    });
+  });
+
+  function sortByNumberOfWatchers(repos) {
+    repos.sort(function(a,b) {
+      return b.watchers - a.watchers;
+    });
+  }
+};
+</pre></code>
+<p>I hope that code is fairly self-explanatory. It's adding a new
+function to jQuery.fn that will query GitHub for information about the given username.
+A definition list is generated to display the repositories.</p>
+<p>Please feel free to use the code, change it, etc. Maybe even let me know if you find
+it useful, I'm on twitter <a href="http://twitter.com/andrewdavey">@andrewdavey</a>!</p>
