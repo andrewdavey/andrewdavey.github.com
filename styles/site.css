@@ -1,53 +1,133 @@
 html {
     background-color: #f8f8f8;
-    color: #222;
+    color: #444;
+}
+
+body {
+  font-family: Georgia, "Times New Roman", Serif;
+  padding: 0 4em;
 }
 
 #header {
-    background-color: #f0f0f0;
-    color: #b0b0b0;
-    font-family: "Segeo UI", Arial, sans-serif;
-    margin-bottom: .5em;
-    padding: 1em;
+  margin-bottom: 1em;
+  padding: 1em 0;
+  border-bottom: solid 1px #354c69;
+  position: relative;
 }
 
 #header .title {
-    font-size: 2.5em;
+  font-size: 3em;
+  color: #354c69;
+  width: 6em;
+  text-align: right;
+}
+
+#header .subtitle {
+  color: #525252;
+  font-size: 1.2em;
+  width: 15.74em;
+  text-align: right;
+}
+
+#header .contact {
+  color: #999;
+  font-size: 1em;
+  position: absolute;
+  top: 1.9em;
+  left: 23em;
+  width: 30em;
+  line-height: 1.4em;
+}
+
+#header a {
+  color: #777;
+}
+
+#header .title a {
+  color: #354c69;
 }
 
 #content {
-  padding: 0 1em;
+  padding-top: 1em;
+  font-size: 1.5em;
+}
+
+#content.home {
+  display: table;
+}
+
+#content .section {
+  display: table-row;
+}
+
+#content .section-header, #content .section-content {
+  display: table-cell;
+  padding-bottom: 2em;
+}
+
+#content .section-header {
+  width: 11.5em;
+  text-align: right;
+  padding-right: 2.8em;
+  padding-left: 1em;
+}
+
+#content .section-header p {
+  font-size: .8em;
+  color: #888;
+  padding-left: 1.5em;
+  line-height: 1.5em;
+}
+
+#content .section-content {
+  max-width: 30em;
 }
 
 #content h1 {
-  font-family: "Segeo UI", Arial, sans-serif;
   font-size: 2em;
-  color: #777;
-  margin-top: .5em;
+  color: #8d4e0a;
   margin-bottom: .3em;
 }
 
 #content h2 {
-  background-color: #efefef;
-    font-family: "Segeo UI", Arial, sans-serif;
-    color: #555;
-    font-size: 1.9em;
-    margin-top: 1em;
-    margin-bottom: .3em;
-    padding: .1em;
+  color: #8d4e0a;
+  font-style: italic;
+  font-size: 1.3em;
+}
+
+#content.post h2 {
+  margin-top: 1em;
+  margin-bottom: .4em;
 }
 
 #content p {
-    width: 36em;
-    font-size: 1.3em;
-    margin-bottom: .7em;
+  margin-bottom: .7em;
+  max-width: 30em;
+  line-height: 1.4em;
 }
 
-#content ul {
-  font-size: 1.3em;
+#content code {
+  font-size: .7em;
+}
+
+#content pre {
   margin-bottom: .7em;
 }
 
-a {
-  color: #5181E8;
+#content ul, #content ol, #content dl {
+  margin-bottom: .7em;
+}
+
+#content li {
+  margin-bottom: .5em;
+}
+
+#content dd {
+  margin-bottom: .5em;
+  font-size: .8em;
+  
+}
+
+#content a {
+  color: #354c69;
 }

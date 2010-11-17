@@ -10,14 +10,21 @@
   </head>
   <body>
     <div id="header">
-      <div class="title"><a href="/">aboutcode.net</a> - a blog by Andrew Davey</div>
-      <div>Send tweets <a href="http://twitter.com/andrewdavey">@andrewdavey</a>.
-        Email <a href="mailto:andrew@equin.co.uk">andrew@equin.co.uk</a>.
-        Fork me on <a href="http://github.com/andrewdavey">GitHub</a>.
-	<a href="http://aboutcode.net/feed.atom">Subscribe</a> to the feed.
+      <div class="title"><a href="/">aboutcode.net</a></div>
+      <div class="subtitle">a blog by Andrew Davey</div>
+      <div class="contact">
+        <p>
+        Follow <a href="http://twitter.com/andrewdavey">@andrewdavey</a> on twitter for daily insights.
+        </p>
+        <p>
+        Email <a href="mailto:andrew@equin.co.uk">andrew@equin.co.uk</a> for anything over 140 characters.
+        </p>
+        <p>
+	      Subscribe to the <a href="http://aboutcode.net/feed.atom">feed</a> and get the goodness in atom format.
+        </p>
       </div>
     </div>
-    <div id="content">
+    <div id="content" class="post">
       <h1>{{ page.title }}</h1>
       {{ content }}
       <a href="http://aboutcode.net{{ page.url }}#disqus_thread">Comments</a>
@@ -44,6 +51,8 @@ dsq.src = 'http://aboutcode.disqus.com/embed.js';
   </body>
   <script src="/scripts/shCore.js" type="text/javascript"></script>
   <script src="/scripts/shBrushCSharp.js" type="text/javascript"></script>
+  <script src="/scripts/shBrushXml.js" type="text/javascript"></script>
+  <script src="/scripts/shBrushJScript.js" type="text/javascript"></script>
   <script type="text/javascript">
   SyntaxHighlighter.all();
   </script>

@@ -2,13 +2,41 @@
 layout: default
 title: aboutcode.net - a blog by Andrew Davey
 ---
-<p>Thanks for stopping by.</p>
-<h2>Some recent blog posts</h2>
-<ul>
-{% for post in site.posts limit:5 %}
-<li>
-<a href="{{ post.url }}">{{ post.title }}</a>
-</li>
-{% endfor %}
-</ul>
-<p>I'm sure I'll write some more soon ;)</p>
+<div class="section">
+  <div class="section-header">
+    <h2>Recent Posts</h2>
+    <p>If I can keep this up for a year then maybe I'll get a few subscribers...!</p>
+  </div>
+  <ul class="section-content">
+    {% for post in site.posts limit:5 %}
+    <li>
+    <a href="{{ post.url }}">{{ post.title }}</a>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<div class="section">
+  <div class="section-header">
+    <h2>Open Source</h2>
+    <p class="about">Projects I'm involved with.<br/>(Or maybe forked for fun!)</p>
+  </div>
+  <div id="opensource-projects" class="section-content"></div>
+</div>
+
+<div class="section">
+  <div class="section-header">
+    <h2>Business</h2>
+    <p>My company, Equin Ltd, develops SaaS products and provides consulting services.</p>
+  </div>
+  <div class="section-content">
+    <dl>
+      <dt><a href="http://www.insighttracking.com/">Insight - Pupil Tracking Software</a></dt>
+      <dd>A web-based assessment and progress tracking system for UK primary schools.</dd>
+      <dt><a href="http://www.tascwheel.com/">TASC - Thinking Active in a Social Context</a></dt>
+      <dd>This is one of the larger websites I've created. I got to make use of shiny new tech such as ASP.NET MVC and jQuery.</dd>
+      <dt><a href="http://www.nuonrenewables.com/">NUON Renewables</a></dt>
+      <dd>A nice corporate website using a simple CMS I created. (Everyone writes their own CMS at some point, right?)</dd>
+    </dl>
+  </div>
+</div>
