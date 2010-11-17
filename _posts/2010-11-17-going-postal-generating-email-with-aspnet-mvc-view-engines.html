@@ -1,0 +1,129 @@
+---
+layout: post
+title: Going Postal – Generating email with ASP.NET MVC View Engines
+---
+<h1>
+    Going Postal – Generating email with ASP.NET MVC View Engines</h1>
+<h2>
+    Preamble</h2>
+<p>
+    The .NET framework provides a simple API for sending email. I assume you are already
+    acquainted with the handy namespace System.Net.Mail. However, dynamically generating
+    the content of an email is still a bit tricky. Code that concatenates strings and
+    variables is no fun to write or read!</p>
+<p>
+    What we need is a way to write text (or html) templates which will be rendered with
+    some data. ASP.NET MVC already has exactly this in the form of Views. So let's reuse
+    the view engine infrastructure to create our emails.</p>
+<p>
+    I created a simple library called <a href="https://github.com/andrewdavey/postal">Postal</a>
+    that does just that. Read on to find out more.</p>
+<h2>
+    Postal in action</h2>
+<p>
+    First, let's see what an email view will look like. I'm using the excellent Razor
+    view engine (coming with MVC3).</p>
+<p>
+    <samp>Example.cshtml</samp></p>
+<code>
+    <pre class="brush: text">To: @View.To
+From: example@website.com
+Subject: @View.Subject
+
+Hello,
+This email was generated using Postal for asp.net mvc on @View.Date.ToShortDateString()
+Message follows:
+@View.Message
+
+Thanks!</pre>
+</code>
+<p>
+    This email is just plain text, but it could contain HTML instead for richer formatting
+    options.</p>
+<p>
+    Notice also that we are defining some email headers (To, From, Subject) at the top.
+    Postal makes it easy to define everything about the email in a single file, rather
+    than having to set the headers in code. Postal will parse the headers out of the
+    rendered view and apply them to the outgoing email message.</p>
+<p>
+    Since this is a regular Razor view, we can use the handy
+    <samp>View</samp>
+    dynamic object to access view data. This data is populated from code. Let's see
+    an example controller action that will send this email.</p>
+<code>
+    <pre class="brush: csharp">public ActionResult Send(string to, string subject, string message)
+{
+    dynamic email = new Email("Example");
+    email.To = to;
+    email.Subject = subject;
+    email.Message = message;
+    email.Date = DateTime.UtcNow;
+
+    sender.Send(email);
+
+    return RedirectToAction("Sent");
+}
+</pre>
+</code>
+<p>
+    This code creates a new Email object, passing the name of the email view to use.
+    Postal will look for email views in
+    <samp>~/Views/Emails/</samp>. So our email view is at
+    <samp>~/Views/Emails/Example.cshtml</samp>.</p>
+<p>
+    We've typed the Email object as dynamic. This lets us define the properties we want
+    at runtime, without having to create an explicit view model class. I like this lightweight
+    approach. (If you don't, feel free to send me a pull request!)</p>
+<p>
+    The Email object is building up a
+    <samp>ViewDataDictionary</samp>
+    internally, ready to send to the view for rendering.</p>
+<p>
+    Once the email object is ready to send, we're calling the
+    <samp>sender</samp>
+    object. This is a field of the controller.</p>
+<code>
+    <pre class="brush: csharp">public class HomeController : Controller
+{
+    // In real code this should be injected by an IoC container.
+    IEmailSender sender = new EmailSender(ViewEngines.Engines);
+
+    // ... action methods here ...
+}
+</pre>
+</code>
+<p>
+    The EmailSender manages finding the view, rendering the text, parsing the headers
+    and finally sending the email.</p>
+<p>
+    Email is sent using the System.Net.Mail.SmtpClient class. You can configure the
+    SMTP settings in web.config. For example, we can simple write the emails to a folder
+    for testing purposes.</p>
+<code>
+    <pre class="brush: xml">&lt;configuration&gt;
+    &lt;system.net&gt;
+        &lt;mailSettings&gt;
+            &lt;smtp deliveryMethod=&quot;SpecifiedPickupDirectory&quot;&gt;
+                &lt;specifiedPickupDirectory pickupDirectoryLocation=&quot;c:\email&quot;/&gt;
+                &lt;network host=&quot;localhost&quot;/&gt;
+            &lt;/smtp&gt;
+        &lt;/mailSettings&gt;
+    &lt;/system.net&gt;
+&lt;/configuration&gt;
+</pre>
+</code>
+<h2>
+    Get the code</h2>
+<p>
+    Postal is something I put together in an afternoon. So the usual warnings about
+    code you find on the internet apply! That said, head over to GitHub and grab the
+    source:</p>
+<p>
+    <a href="https://github.com/andrewdavey/postal">https://github.com/andrewdavey/postal</a></p>
+<p>
+    If you want to change it, fix bugs, etc, please fork the repository and send me
+    pull requests. I love to see people getting involved with open source projects.
+    (Postal has the MIT License.)</p>
+<p>
+    For questions and discussion, either follow me on twitter <a href="http://twitter.com/andrewdavey">
+        @andrewdavey</a> or leave a comment here.</p>
