@@ -58,7 +58,7 @@ private string ProductUrl(Product p) {
 <code><pre class="brush: xml">
 @dynamic
 &lt;ul&gt;@foreach (var product in Model.Products) {
-    &lt;li&gt;&lt;a href="@ product.Url"&gt;@product.Name&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="@product.Url"&gt;@product.Name&lt;/a&gt;&lt;/li&gt;
 }&lt;/ul&gt;</pre></code>
 <p>Note: We are passing the viewmodel in to the view's Model property, rather than using the View object as before. Model is also typed as dynamic however in this case. This is because Controller's ViewModel property is readonly so we can't set it to our own object. Please vote on the CodePlex issue to have this fixed.</p>
 
