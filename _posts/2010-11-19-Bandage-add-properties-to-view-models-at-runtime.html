@@ -55,7 +55,7 @@ private string ProductUrl(Product p) {
 }</pre></code>
 <p>The key line of code there is when we add a DynamicProperty for the Product type. We provide the name of the property and a lambda that will return the value for a given Product. This is registered for the entire view model. So any Product object, anywhere in the object graph, will have this dynamic property available.</p>
 <p>The view can now use this dynamic view model and its magic dynamic properties.</p>
-<code>&lt;pre class="brush: xml"&gt;
+<code><pre class="brush: xml">
 @dynamic
 &lt;ul&gt;@foreach (var product in Model.Products) {
     &lt;li&gt;&lt;a href="@ product.Url"&gt;@product.Name&lt;/a&gt;&lt;/li&gt;
