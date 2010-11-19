@@ -1,27 +1,27 @@
-﻿---
+---
 layout: post
-title: Bandage – Add properties to view models at runtime
+title: Bandage - Add properties to view models at runtime
 ---
 <h2>Introduction</h2>
-<p>Are you a pragmatic ASP.NET MVC web developer? I like to think I am. When working with simple entities it feels like overkill to use separate view model objects in my views. I’d rather just send my entity directly to the view and get on with something more fun (like delivering business value!)</p>
-<p>Whilst AutoMapper does a great job of conventionally mapping entities into view models, I’d rather not have to create the view model class when it’s essentially a property-by-property mirror of my entity.</p>
-<p>Nothing stops me sending entities directly to the view. However, things get messy when I need to display information derived from properties of the entities. I end up resorting to helpers, extension methods and other contraptions that don’t feel as natural as simply getting a property value. Furthermore, when using dynamic view models, extension methods do not work, so they’re no good anyway.</p>
-<p>If I later decide to man-up and create real view models, I’d then have to replace all helper calls in my view with properties. Have you tried refactoring view code? It’s not fun!</p>
+<p>Are you a pragmatic ASP.NET MVC web developer? I like to think I am. When working with simple entities it feels like overkill to use separate view model objects in my views. I'd rather just send my entity directly to the view and get on with something more fun (like delivering business value!)</p>
+<p>Whilst AutoMapper does a great job of conventionally mapping entities into view models, I'd rather not have to create the view model class when it's essentially a property-by-property mirror of my entity.</p>
+<p>Nothing stops me sending entities directly to the view. However, things get messy when I need to display information derived from properties of the entities. I end up resorting to helpers, extension methods and other contraptions that don't feel as natural as simply getting a property value. Furthermore, when using dynamic view models, extension methods do not work, so they're no good anyway.</p>
+<p>If I later decide to man-up and create real view models, I'd then have to replace all helper calls in my view with properties. Have you tried refactoring view code? It's not fun!</p>
 <p>I created the Bandage library to solve this problem. Read on for a simple example and learn what Bandage can do for you.</p>
 
 <h2>Use Case</h2>
-<p>Let’s take a use case I hit quite often when developing MVC web applications. We have some list of objects, products for example, to show on the screen. For each product, we want a hyperlink to a details page.</p>
+<p>Let's take a use case I hit quite often when developing MVC web applications. We have some list of objects, products for example, to show on the screen. For each product, we want a hyperlink to a details page.</p>
 <code><pre class="brush: csharp">class Product {
     public int Id { get; set; }
     public string Name { get; set; }
 }</pre></code>
-<p>The URL for a product details page is formed using the Id and the Name properties. The Name property will be processed to create a “slug” (a URL safe version of the actual Name). This is to be more SEO-friendly. We keep the Id in the URL to keep our coding easy.</p>
-<p>For example: The product <samp>new Product { Id = 1, Name = “Interwebz for Dummies” }</samp> will have the URL <samp>/product/1/interwebz-for-dummies</samp></p>
+<p>The URL for a product details page is formed using the Id and the Name properties. The Name property will be processed to create a "slug" (a URL safe version of the actual Name). This is to be more SEO-friendly. We keep the Id in the URL to keep our coding easy.</p>
+<p>For example: The product <samp>new Product { Id = 1, Name = "Interwebz for Dummies" }</samp> will have the URL <samp>/product/1/interwebz-for-dummies</samp></p>
 <p>My MVC route set up defines the route as follows:</p>
 <code><pre class="brush: csharp">routes.RouteUrl(
-    “ProductDetails”,
-    “product/{id}/{slug}”,
-    new { controller = “Product”, action=”Details” }
+    "ProductDetails",
+    "product/{id}/{slug}",
+    new { controller = "Product", action="Details" }
 );</pre></code>
 <p>The ProductController List action will get the products and send them to the view like this:</p>
 <code><pre class="brush: csharp">public ActionResult List() {
@@ -30,37 +30,37 @@ title: Bandage – Add properties to view models at runtime
 }</pre></code>
 <p>The List view is then something like:</p>
 <code><pre class="brush: xml">&lt;ul&gt;@foreach (Product product in View.Products) {
-    &lt;li&gt;&lt;a href=”Url.RouteUrl(“ProductDetails”, new { id = product.Id, slug = Util.GetSlug(product.Name) })”&gt;@product.Name&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="Url.RouteUrl("ProductDetails", new { id = product.Id, slug = Util.GetSlug(product.Name) })"&gt;@product.Name&lt;/a&gt;&lt;/li&gt;
 }&lt;/ul&gt;</pre></code>
-<p>Code like that, in my opinion, does not belong in the view. It’s complex and really doesn’t express the intent well.</p>
+<p>Code like that, in my opinion, does not belong in the view. It's complex and really doesn't express the intent well.</p>
 <p>It would be so much nicer to write the following.</p>
 <code><pre class="brush: xml">&lt;ul&gt;@foreach (var product in View.Products) {
-    &lt;li&gt;&lt;a href=”@ product.Url”&gt;@product.Name&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="@ product.Url"&gt;@product.Name&lt;/a&gt;&lt;/li&gt;
 }&lt;/ul&gt;</pre></code>
-<p>We simply need a way to add an extra property to Product. We don’t want the Url property in our business object, it’s purely a web-thing. We don’t want to create a view model, that’s overkill for simple situations like this.</p>
+<p>We simply need a way to add an extra property to Product. We don't want the Url property in our business object, it's purely a web-thing. We don't want to create a view model, that's overkill for simple situations like this.</p>
 <p>Notice that the product variable in the second code snippet is dynamically typed. This is because View is dynamic, so anything you get from it is also typed as dynamic. This dynamism is where we can inject some magic pixie dust.</p>
 
 <h2>Say hello to Bandage</h2>
-<p>Bandage is a small library which lets you define dynamic view models and then effectively monkey patch properties onto existing types. So, for our example, we’ll have Product objects in the view model and then add a Url property to each product.</p>
+<p>Bandage is a small library which lets you define dynamic view models and then effectively monkey patch properties onto existing types. So, for our example, we'll have Product objects in the view model and then add a Url property to each product.</p>
 <p>The controller List action changes from before to this:</p>
 <code><pre class="brush: csharp">public ActionResult List() {
     var viewmodel = new Bandage.DynamicViewModel();
     viewmodel.Products = ProductRepository.GetAll();
-    viewmodel.Add(DynamicProperty.For<Product>(“Url”, product => ProductUrl(product)));
+    viewmodel.Add(DynamicProperty.For<Product>("Url", product => ProductUrl(product)));
     Return View(viewmodel);
 }
 
 private string ProductUrl(Product p) {
-    return Url.RouteUrl(“ProductDetails”, new { id = product.Id, slug = Util.GetSlug(product.Name) });
+    return Url.RouteUrl("ProductDetails", new { id = product.Id, slug = Util.GetSlug(product.Name) });
 }</pre></code>
 <p>The key line of code there is when we add a DynamicProperty for the Product type. We provide the name of the property and a lambda that will return the value for a given Product. This is registered for the entire view model. So any Product object, anywhere in the object graph, will have this dynamic property available.</p>
 <p>The view can now use this dynamic view model and its magic dynamic properties.</p>
 <code>&lt;pre class="brush: xml"&gt;
 @dynamic
 &lt;ul&gt;@foreach (var product in Model.Products) {
-    &lt;li&gt;&lt;a href=”@ product.Url”&gt;@product.Name&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="@ product.Url"&gt;@product.Name&lt;/a&gt;&lt;/li&gt;
 }&lt;/ul&gt;</pre></code>
-<p>Note: We are passing the viewmodel in to the view’s Model property, rather than using the View object as before. Model is also typed as dynamic however in this case. This is because Controller’s ViewModel property is readonly so we can’t set it to our own object. Please vote on the CodePlex issue to have this fixed.</p>
+<p>Note: We are passing the viewmodel in to the view's Model property, rather than using the View object as before. Model is also typed as dynamic however in this case. This is because Controller's ViewModel property is readonly so we can't set it to our own object. Please vote on the CodePlex issue to have this fixed.</p>
 
 <h2>Behind the curtain</h2>
 <p>DynamicViewModel intercepts any attempt to get a property and returns a special wrapper object instead of the original value. This wrapper is also dynamic and intercepts property calls and other kinds of member access.</p>
@@ -70,4 +70,4 @@ private string ProductUrl(Product p) {
 <h2>Try Bandage for yourself</h2>
 <p>Bandage is an open source library (MIT License). You can get the source code at GitHub. Feel free to fork, improve and send me pull requests.</p>
 <p>The dynamic object wrapper is still beta-quality and needs some serious testing. However it does work for my meagre needs.</p>
-<p>I’d love to hear what you think about Bandage. Give me a shout on twitter @andrewdavey or leave a comment here.</p>
+<p>I'd love to hear what you think about Bandage. Give me a shout on twitter @andrewdavey or leave a comment here.</p>
