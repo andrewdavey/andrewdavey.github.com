@@ -16,7 +16,7 @@ title: Bandage - Add properties to view models at runtime
     public string Name { get; set; }
 }</pre></code>
 <p>The URL for a product details page is formed using the Id and the Name properties. The Name property will be processed to create a "slug" (a URL safe version of the actual Name). This is to be more SEO-friendly. We keep the Id in the URL to keep our coding easy.</p>
-<p>For example: The product <samp>new Product { Id = 1, Name = "Interwebz for Dummies" }</samp> will have the URL <samp>/product/1/interwebz-for-dummies</samp></p>
+<p>For example: The product <br/><samp>new Product { Id = 1, Name = "Interwebz for Dummies" }</samp><br/>will have the URL <samp>/product/1/interwebz-for-dummies</samp></p>
 <p>My MVC route set up defines the route as follows:</p>
 <code><pre class="brush: csharp">routes.RouteUrl(
     "ProductDetails",
@@ -35,7 +35,7 @@ title: Bandage - Add properties to view models at runtime
 <p>Code like that, in my opinion, does not belong in the view. It's complex and really doesn't express the intent well.</p>
 <p>It would be so much nicer to write the following.</p>
 <code><pre class="brush: xml">&lt;ul&gt;@foreach (var product in View.Products) {
-    &lt;li&gt;&lt;a href="@ product.Url"&gt;@product.Name&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="@product.Url"&gt;@product.Name&lt;/a&gt;&lt;/li&gt;
 }&lt;/ul&gt;</pre></code>
 <p>We simply need a way to add an extra property to Product. We don't want the Url property in our business object, it's purely a web-thing. We don't want to create a view model, that's overkill for simple situations like this.</p>
 <p>Notice that the product variable in the second code snippet is dynamically typed. This is because View is dynamic, so anything you get from it is also typed as dynamic. This dynamism is where we can inject some magic pixie dust.</p>
