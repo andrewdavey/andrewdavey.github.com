@@ -1,0 +1,30 @@
+---
+layout: nil
+---
+<?xml version="1.0"?>
+<rss xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:pingback="http://madskills.com/public/xml/rss/module/pingback/" xmlns:trackback="http://madskills.com/public/xml/rss/module/trackback/" xmlns:wfw="http://wellformedweb.org/CommentAPI/" xmlns:slash="http://purl.org/rss/1.0/modules/slash/" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+<channel>
+<title>AboutCode.net</title>
+<link>http://www.aboutcode.net/</link>
+<description>Thoughts on Software by Andrew Davey</description>
+<language>en-us</language>
+<copyright>Andrew Davey</copyright>
+<lastBuildDate>Thu, 15 Oct 2009 13:40:39 GMT</lastBuildDate>
+<generator>newtelligence dasBlog 2.2.8279.16125</generator>
+<managingEditor>andrew@equin.co.uk</managingEditor>
+<webMaster>andrew@equin.co.uk</webMaster>
+
+
+{% for post in site.posts %}
+<item>
+<title>{{ post.title }}</title>
+<guid isPermaLink="true">http://aboutcode.net{{ post.url }}</guid>
+<link>http://aboutcode.net{{ post.url }}</link>
+<pubDate>{{ post.date | date_to_xmlschema }}</pubDate>
+<description>
+{{ post.content | xml_escape }}
+</description>
+</item>
+{% endfor %}
+</channel>
+</rss>
