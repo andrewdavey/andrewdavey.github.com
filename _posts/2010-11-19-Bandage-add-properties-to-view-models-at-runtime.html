@@ -46,7 +46,7 @@ title: Bandage - Add properties to view models at runtime
 <code><pre class="brush: csharp">public ActionResult List() {
     var viewmodel = new Bandage.DynamicViewModel();
     viewmodel.Products = ProductRepository.GetAll();
-    viewmodel.Add(DynamicProperty.For&lt;Product&gt;("Url", product => ProductUrl(product)));
+    viewmodel.Add(DynamicProperty.For&lt;Product&gt;("Url", product =&gt; ProductUrl(product)));
     Return View(viewmodel);
 }
 
