@@ -9,11 +9,9 @@ layout: nil
 <description>Thoughts on Software by Andrew Davey</description>
 <language>en-us</language>
 <copyright>Andrew Davey</copyright>
-<lastBuildDate>Thu, 15 Oct 2009 13:40:39 GMT</lastBuildDate>
-<generator>newtelligence dasBlog 2.2.8279.16125</generator>
+<lastBuildDate>{{ site.time | date_to_xmlschema }}</lastBuildDate>
 <managingEditor>andrew@equin.co.uk</managingEditor>
 <webMaster>andrew@equin.co.uk</webMaster>
-
 
 {% for post in site.posts %}
 <item>
