@@ -2,6 +2,7 @@
 layout: post
 title: Bandage - Add properties to view models at runtime
 ---
+<p>This post introduces the <a href="https://github.com/andrewdavey/Bandage">Bandage</a> project for ASP.NET MVC.</p>
 <h2>Introduction</h2>
 <p>Are you a pragmatic ASP.NET MVC web developer? I like to think I am. When working with simple entities it feels like overkill to use separate view model objects in my views. I'd rather just send my entity directly to the view and get on with something more fun (like delivering business value!)</p>
 <p>Whilst AutoMapper does a great job of conventionally mapping entities into view models, I'd rather not have to create the view model class when it's essentially a property-by-property mirror of my entity.</p>
@@ -56,7 +57,6 @@ private string ProductUrl(Product p) {
 <p>The key line of code there is when we add a DynamicProperty for the Product type. We provide the name of the property and a lambda that will return the value for a given Product. This is registered for the entire view model. So any Product object, anywhere in the object graph, will have this dynamic property available.</p>
 <p>The view can now use this dynamic view model and its magic dynamic properties.</p>
 <code><pre class="brush: xml">
-@dynamic
 &lt;ul&gt;@foreach (var product in Model.Products) {
     &lt;li&gt;&lt;a href="@product.Url"&gt;@product.Name&lt;/a&gt;&lt;/li&gt;
 }&lt;/ul&gt;</pre></code>
