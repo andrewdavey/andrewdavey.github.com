@@ -57,7 +57,7 @@ Thanks!</pre>
     email.Message = message;
     email.Date = DateTime.UtcNow;
 
-    sender.Send(email);
+    service.Send(email);
 
     return RedirectToAction("Sent");
 }
@@ -78,20 +78,20 @@ Thanks!</pre>
     internally, ready to send to the view for rendering.</p>
 <p>
     Once the email object is ready to send, we're calling the
-    <samp>sender</samp>
+    <samp>service</samp>
     object. This is a field of the controller.</p>
 <code>
     <pre class="brush: csharp">public class HomeController : Controller
 {
     // In real code this should be injected by an IoC container.
-    IEmailSender sender = new EmailSender(ViewEngines.Engines);
+    IEmailService service = new EmailService(ViewEngines.Engines);
 
     // ... action methods here ...
 }
 </pre>
 </code>
 <p>
-    The EmailSender manages finding the view, rendering the text, parsing the headers
+    The EmailService manages finding the view, rendering the text, parsing the headers
     and finally sending the email.</p>
 <p>
     Email is sent using the System.Net.Mail.SmtpClient class. You can configure the
