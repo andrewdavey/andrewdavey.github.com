@@ -1,0 +1,60 @@
+﻿---
+layout: post
+title: Displaying a flash message with ASP.NET MVC
+---
+<p>Post-Redirect-Get is a common pattern used in MVC applications. You show a form to the user, they enter their data and click a button to post it to the server. A controller processes the form and returns an HTTP redirect response to the web browser. The browser follows the redirect by getting the given URL.</p>
+<p>The form post controller action may need to show a message to the user. For example, saying "your message has been sent". So you have to pass this message to the next page somehow.</p>
+<h2>The Wrong Way</h2>
+<p>One approach is to use the controller's TempData dictionary. TempData, by default, uses the session to pass data between requests. The post action method will put the message into TempData. The page we're redirecting to will read TempData and display the message.</p>
+<p>Unfortunately using TempData will cause an annoying bug when the browser has already cached the final page. The redirect tells the browser to get the page, but the browser has it cached. So the page is shown without the extra call to the server. This means the TempData is never read.</p>
+<p>What's worse is some subsequent page request may not be cached and actually read the TempData which was not intended for it!</p>
+<h2>A Better Way</h2>
+<p>Use a cookie to send the message along with the redirect request. The controller action method will look like:</p>
+<code><pre class="csharp">public ActionResult ProcessForm() {
+    // ... process form ...
+    Response.Cookies.Add(new HttpCookie("FlashMessage", "Data processed") { Path = "/" }));
+    return RedirectToAction("Index");
+}
+</pre></code>
+<p>In the view we're redirecting to, use JavaScript to read the cookie and display the message. Then delete the cookie so the message is not shown again the next time we load this page.</p>
+<p>I use <a href="https://github.com/carhartl/jquery-cookie">jquery.cookie.js</a> to handle the cookie access. I use a jQuery extension that wraps up the flash message display code:</p>
+<code><pre class="javascript">$.fn.flashMessage = function (options) {
+    var target = this;
+    options = $.extend({}, options, { timeout: 3000 });
+    if (!options.message) {
+        options.message = getFlashMessageFromCookie();
+        deleteFlashMessageCookie();
+    }
+    if (options.message) {
+        if (typeof options.message === "string") {
+            target.html("<span>" + options.message + "</span>");
+        } else {
+            target.empty().append(options.message);
+        }
+    }
+
+    if (target.children().length === 0) return;
+
+    target.fadeIn().one("click", function () {
+        $(this).fadeOut();
+    });
+
+    if (options.timeout > 0) {
+        setTimeout(function () { target.fadeOut(); }, options.timeout);
+    }
+
+    return this;
+
+    function getFlashMessageFromCookie() {
+        return $.cookie("FlashMessage");
+    }
+
+    function deleteFlashMessageCookie() {
+        $.cookie("FlashMessage", null, { path: '/' });
+    }
+};
+</pre></code>
+<p>The view contains a div to show the message:</p>
+<code><pre class="xml">&lt;div id="flash-message"&gt;&lt;/div&gt;</pre></code>
+<p>The flash message extension is called using:</p>
+<code><pre class="javascript">$(function() { $("#flash-message").flashMessage(); });</pre></code>
