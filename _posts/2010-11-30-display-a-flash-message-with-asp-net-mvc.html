@@ -10,7 +10,7 @@ title: Displaying a flash message with ASP.NET MVC
 <p>What's worse is some subsequent page request may not be cached and actually read the TempData which was not intended for it!</p>
 <h2>A Better Way</h2>
 <p>Use a cookie to send the message along with the redirect request. The controller action method will look like:</p>
-<code><pre class="csharp">public ActionResult ProcessForm() {
+<code><pre class="brush: csharp">public ActionResult ProcessForm() {
     // ... process form ...
     Response.Cookies.Add(new HttpCookie("FlashMessage", "Data processed") { Path = "/" }));
     return RedirectToAction("Index");
@@ -18,7 +18,7 @@ title: Displaying a flash message with ASP.NET MVC
 </pre></code>
 <p>In the view we're redirecting to, use JavaScript to read the cookie and display the message. Then delete the cookie so the message is not shown again the next time we load this page.</p>
 <p>I use <a href="https://github.com/carhartl/jquery-cookie">jquery.cookie.js</a> to handle the cookie access. I use a jQuery extension that wraps up the flash message display code:</p>
-<code><pre class="javascript">$.fn.flashMessage = function (options) {
+<code><pre class="brush: javascript">$.fn.flashMessage = function (options) {
     var target = this;
     options = $.extend({}, options, { timeout: 3000 });
     if (!options.message) {
@@ -55,6 +55,6 @@ title: Displaying a flash message with ASP.NET MVC
 };
 </pre></code>
 <p>The view contains a div to show the message:</p>
-<code><pre class="xml">&lt;div id="flash-message"&gt;&lt;/div&gt;</pre></code>
+<code><pre class="brush: xml">&lt;div id="flash-message"&gt;&lt;/div&gt;</pre></code>
 <p>The flash message extension is called using:</p>
-<code><pre class="javascript">$(function() { $("#flash-message").flashMessage(); });</pre></code>
+<code><pre class="brush: javascript">$(function() { $("#flash-message").flashMessage(); });</pre></code>
