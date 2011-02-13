@@ -43,13 +43,13 @@ title: MVC routing for public facing web applications
     Then make the following changes to make it still behave as an Area route:</p>
 <code>
     <pre class="brush: csharp">AreaRegistration.RegisterAllAreas(); // Force App and Admin to run first
-<strong>var publicRoute =</strong> routes.MapRoute(
+var publicRoute = routes.MapRoute(
     "PublicRoute",
     "{controller}/{action}/{id}",
     new { controller = "Home", action = "Index", id = UrlParameter.Optional },
-    <strong>new[] { typeof(Areas.Public.Controllers.HomeController).Namespace }</strong>
+    new[] { typeof(Areas.Public.Controllers.HomeController).Namespace }
 );
-<strong>publicRoute.DataTokens["Area"] = "Public";</strong></pre>
+publicRoute.DataTokens["Area"] = "Public";</pre>
 </code>
 <p>
     This gives the route the correct namespace to look for controllers and assigns the
