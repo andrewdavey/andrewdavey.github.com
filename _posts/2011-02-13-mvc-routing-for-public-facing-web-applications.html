@@ -1,0 +1,63 @@
+---
+layout: post
+title: MVC routing for public facing web applications
+---
+<p>
+    When building a public web application with ASP.NET MVC, I often want to divide
+    the project into three major parts.
+</p>
+<ol>
+    <li>The publicly visible, marketing website with about pages, product tour, contact
+        info, sign up, etc.</li>
+    <li>The actual application, secured behind a login form.</li>
+    <li>A system admin area, so I can manage user accounts, monitor reports, etc.</li>
+</ol>
+<p>
+    Areas, in MVC 2 and better, make it easy to slice up the three parts of the web
+    application. Read on learn how I set this up and get some useful tips you can use
+    for your own applications.
+</p>
+<h2>
+    Everything is an Area</h2>
+<p>
+    You probably want the public marketing pages to live at the root of your URL structure.
+    So it's tempting to put the controllers and views into the top-level Controllers
+    and Views folders. Don't do this. I don't see why the marketing junk should get
+    special treatment. It's an area just like the application and the system admin areas.</p>
+<p>
+    So add three areas to your MVC project called "Public", "App", and "Admin". The
+    default route registration for these is mostly OK, except for Public. We don't want
+    "public" in the URLs. However, simply editing the route registration for Public
+    will cause a potential routing failure. The order of route registration matters.</p>
+<p>
+    If, by chance, the Public area is registered before the other two, then its default
+    route of "{controller}/{action}/{id}" will greedily steal any URL heading for App
+    or Admin. For example, the URL "app/home/index" would end up looking for a controller
+    in Public called "AppController" and an action method called "Home". This is not
+    what we intended!</p>
+<p>
+    To remedy the situation we must force the Public area to general route to be added
+    after all other areas. Cut it out of the PublicAreaRegistration.cs file. Move it
+    to Application_Start in Global.asax, after the call to AreaRegistration.RegisterAllAreas.</p>
+<p>
+    Then make the following changes to make it still behave as an Area route:</p>
+<code>
+    <pre class="brush: csharp">AreaRegistration.RegisterAllAreas(); // Force App and Admin to run first
+<strong>var publicRoute =</strong> routes.MapRoute(
+    "PublicRoute",
+    "{controller}/{action}/{id}",
+    new { controller = "Home", action = "Index", id = UrlParameter.Optional },
+    <strong>new[] { typeof(Areas.Public.Controllers.HomeController).Namespace }</strong>
+);
+<strong>publicRoute.DataTokens["Area"] = "Public";</strong></pre>
+</code>
+<p>
+    This gives the route the correct namespace to look for controllers and assigns the
+    Area name.</p>
+<p>
+    URLs heading for App and Admin will reach their intended destinations. You can still
+    keep custom routes in Public's registration. Just make sure they aren't too general,
+    capturing URLs for areas.</p>
+<p>
+    I hope you found this tip useful. <a href="http://twitter.com/andrewdavey">Follow me
+        on Twitter</a> for constant web application development banter!</p>
