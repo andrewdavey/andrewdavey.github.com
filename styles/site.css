@@ -8,6 +8,14 @@ body {
   padding: 0 4em;
 }
 
+strong {
+    font-weight: bold;
+}
+
+em {
+    font-style: italic;
+}
+
 #header {
   margin-bottom: 1em;
   padding: 1em 0;
@@ -120,6 +128,10 @@ body {
 
 #content li {
   margin-bottom: .5em;
+}
+
+#content ol li {
+    list-style-type: decimal;
 }
 
 #content dd {
