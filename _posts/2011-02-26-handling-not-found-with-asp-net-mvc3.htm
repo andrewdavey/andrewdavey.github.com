@@ -21,13 +21,13 @@ title: Handling Not Found with ASP.NET MVC3
             Imagine we have a controller called HomeController and a default route of &ldquo;{controller}/{action}&rdquo;
             in the route table. Then a URL with the path &ldquo;home/epicfail&rdquo; will be routed to the
             HomeController and look for an action method called &ldquo;EpicFail&rdquo;.
-            <p>
             </p>
+            <p>
             If the action method does not exist then the Controller's default HandleUnknownAction
             method is called and throws an HttpException, with 404 as the status code. ASP.NET
             then shows its nasty error page.
-            <p>
             </p>
+            <p>
             A possible solution is to override HandleUnknownAction and render your friendly
             404 page instead of throwing an exception.
         </p>
