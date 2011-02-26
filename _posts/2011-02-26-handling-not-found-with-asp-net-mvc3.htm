@@ -1,0 +1,97 @@
+﻿--- title: Handling Not Found with ASP.NET MVC3 layout: post ---
+<p>
+    A web application built using ASP.NET MVC can break in a few different places when
+    handling a URL it does not recognise. By default, your user will receive a rather
+    unfriendly default ASP.NET error page. Ideally, you should be catching these &ldquo;not
+    found&rdquo; errors and displaying a more <a href="http://www.codinghorror.com/blog/2007/03/creating-user-friendly-404-pages.html">
+        useful page</a>.
+</p>
+<p>
+    First let's look at the places you need to watch for broken URLs in an ASP.NET MVC3
+    application. Then I'll introduce a simple library you can use to handle all this.
+</p>
+<ol>
+    <li>
+        <p>
+            Missing action method on a controller</p>
+        <p>
+            Imagine we have a controller called HomeController and a default route of &ldquo;{controller}/{action}&rdquo;
+            in the route table. Then a URL with the path &ldquo;home/epicfail&rdquo; will be routed to the
+            HomeController and look for an action method called &ldquo;EpicFail&rdquo;.
+            <p>
+            </p>
+            If the action method does not exist then the Controller's default HandleUnknownAction
+            method is called and throws an HttpException, with 404 as the status code. ASP.NET
+            then shows its nasty error page.
+            <p>
+            </p>
+            A possible solution is to override HandleUnknownAction and render your friendly
+            404 page instead of throwing an exception.
+        </p>
+    </li>
+    <li>
+        <p>
+            Missing controller</p>
+        <p>
+            Given a route of &ldquo;{controller}/{action}&rdquo;, the URL &ldquo;missing/example&rdquo; will cause a
+            search for a controller called &ldquo;MissingController&rdquo;. If this controller is not found
+            then a 404 HttpException is thrown.
+        </p>
+        <p>
+            To catch this, you need to have a custom controller factory (IControllerFactory)
+            that returns a special &ldquo;not found&rdquo; controller to handle the broken request.</p>
+    </li>
+    <li>
+        <p>
+            Unknown route</p>
+        <p>
+            If the URL does not match any of the defined routes then a 404 HttpException is
+            thrown. To intercept this you need to create a &ldquo;catch-all&rdquo; route. For example, &ldquo;{*any}&rdquo;
+            and map this to some controller that will then show your friendly 404 page.</p>
+    </li>
+    <li>
+        <p>
+            Deliberate not found response</p>
+        <p>
+            Sometimes your action methods need to say that a resource is not found. For example,
+            a row with the given ID was not found in the database anymore. You may want to reuse
+            a common &ldquo;Not Found&rdquo; view.</p>
+    </li>
+</ol>
+<h2>
+    Introducing NotFoundMvc</h2>
+<p>
+    Correctly handling all the possible &ldquo;not found&rdquo; causes is non-trivial and is likely
+    to be repeated in many MVC applications. Therefore I created the NotFoundMvc library.</p>
+<p>
+    Add the library to your project via nuget: <strong>Install-Package NotFoundMvc</strong></p>
+<p>
+    Or get the source code on GitHub: <a href="https://github.com/andrewdavey/NotFoundMvc">
+        github.com/andrewdavey/NotFoundMvc</a></p>
+<p>
+    Referencing the NotFoundMvc.dll assembly from your web application project will
+    cause it to auto-start with the application. (Thank you <a href="http://msdn.microsoft.com/en-us/library/system.web.preapplicationstartmethodattribute.aspx">
+        PreApplicationStartMethod</a> .)</p>
+<p>
+    NotFoundMvc will:</p>
+<ul>
+    <li>Handle all &ldquo;not found&rdquo; causes and render a friendly error view</li>
+    <li>Add a catch-all route to the end of the route table to handle unrecognised routes</li>
+    <li>Wrap the controller factory to handle missing controllers</li>
+    <li>Wrap the ActionInvoker of each created controller to handle missing actions</li>
+    <li>Provide a NotFoundViewResult you can use to return a NotFound view from your actions</li>
+</ul>
+<p>
+    The wrapper objects pass through to the original implementations. So if, for example,
+    you're using a custom controller factory already, it will still work as before.</p>
+<p>
+    Installing the nugget package will also add a basic NotFound.cshtml view to the
+    ~\Views\Shared folder. So if you're not using nugget, then please create this view
+    manually. If you're using aspx views, or something else, change the file extension
+    as required.</p>
+<p>
+    The output of the NotFound view must be at least 512 bytes in length, otherwise
+    IE and Chrome will show their own error page! The default NotFound.cshtml view includes
+    padding spaces to avoid this.</p>
+<p>
+    The source code for NotFoundMvc contains a sample project to demonstrate basic usage.</p>
