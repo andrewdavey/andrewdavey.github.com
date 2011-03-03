@@ -135,6 +135,10 @@ em {
     list-style-type: decimal;
 }
 
+#content ul li {
+  list-style-type: disc;
+}
+
 #content dd {
   margin-bottom: .5em;
   font-size: .8em;
@@ -143,4 +147,8 @@ em {
 
 #content a {
   color: #354c69;
+}
+
+.home #content li {
+  margin-left: 0;
 }
