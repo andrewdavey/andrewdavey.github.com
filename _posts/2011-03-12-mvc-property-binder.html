@@ -1,0 +1,102 @@
+---
+layout: post
+title: MVC Property Binder
+---
+<p>
+ASP.NET MVC has a rich model binder. Complex objects can be created from various bits of the HTTP request data. However, this isn't always enough and sometimes we need to extend the default binding behaviour.</p>
+<p>
+In my application, I have a data structure to represent a "change passwor" request.</p>
+<code><pre class="brush: csharp">class ChangePassword {
+  public string Username {get; set;}
+  public string OldPassword {get; set;}
+  public string NewPassword {get; set;}
+  public string ConfirmNewPassword {get; set;}
+}</pre></code>
+<p>
+A controller action method receives this and performs the required update.</p>
+<code><pre class="brush: csharp">public ActionResult ChangePassword(ChangePassword change) { ... }</pre></code>
+<p>
+An HTML form will provide the three password property values, but the Username property is different. The username must be that of the currently authenticated user. This value is contained in HttpContext.User.Identity.Name.</p>
+<p>
+I don't want it allowing some evil user to pass in some other username, via the query string, for example. So I need to tell the MVC binder how to assign this property. This requires a custom model binder.</p>
+<p>
+The problem is that MVC does not provide a way to set a custom model binder for a specific property.</p>
+<p>What I like to do is this:</p>
+<code><pre class="brush: csharp">class ChangePassword {
+  [PropertyBinder(typeof(CurrentUsernameBinder))]
+  public string Username {get;set;}
+  public string OldPassword {get;set;}
+  public string NewPassword {get;set;}
+  public string ConfirmNewPassword {get;set;}
+}</pre></code>
+<p>
+PropertyBinder is a basic attribute that lets me declare the model binder to use.</p>
+<code><pre class="brush: csharp">public class PropertyBinderAttribute : Attribute
+{
+  public PropertyBinderAttribute(Type binderType)
+  {
+    BinderType = binderType;
+  }
+
+  public Type BinderType { get; private set; }
+}</pre></code>
+<p>
+For this new attribute to work, I have to override the default model binder like this:</p>
+public class CustomModelBinder : DefaultModelBinder
+{
+  protected override void BindProperty(ControllerContext controllerContext, ModelBindingContext bindingContext, System.ComponentModel.PropertyDescriptor propertyDescriptor)
+  {
+    // Check if the property has the PropertyBinderAttribute, meaning
+    // it's specifying a different binder to use.
+    var propertyBinderAttribute = TryFindPropertyBinderAttribute(propertyDescriptor);
+    if (propertyBinderAttribute != null)
+    {
+      var binder = CreateBinder(propertyBinderAttribute);
+      var value = binder.BindModel(controllerContext, bindingContext);
+      propertyDescriptor.SetValue(bindingContext.Model, value);
+    }
+    else // revert to the default behavior.
+    {
+      base.BindProperty(controllerContext, bindingContext, propertyDescriptor);
+    }
+  }
+
+  IModelBinder CreateBinder(PropertyBinderAttribute propertyBinderAttribute)
+  {
+    return (IModelBinder)DependencyResolver.Current.GetService(propertyBinderAttribute.BinderType);
+  }
+
+  PropertyBinderAttribute TryFindPropertyBinderAttribute(PropertyDescriptor propertyDescriptor)
+  {
+    return propertyDescriptor.Attributes
+      .OfType<PropertyBinderAttribute>()
+      .FirstOrDefault();
+  }
+}</pre></code>
+<p>
+By overriding the BindProperty method, I can check for the attribute and call into the specified model binder.</p>
+<p>This line of code in Global.asax Application_Start to assign the new default binder:</p>
+<code><pre class="brush: csharp">System.Web.Mvc.ModelBinders.Binders.DefaultBinder = new CustomModelBinder();</pre></code>
+<p>
+Incidentally, the username binder looks something like this:</a>
+<code><pre class="brush: csharp">public class ClientIdBinder : IModelBinder
+{
+  readonly HttpContextBase httpContext;
+
+  public ClientIdBinder(HttpContextBase httpContext)
+  {
+    this.httpContext = httpContext;
+  }
+
+  public object BindModel(ControllerContext controllerContext, ModelBindingContext bindingContext)
+  {
+    if (httpContext.User.Identity.IsAuthenticated)
+    {
+      return httpContext.User.Identity.Name;
+    }
+
+    bindingContext.ModelState.AddModelError(bindingContext.ModelName, "User not signed in."); 
+    
+    return null;
+  }
+}</pre></code>
