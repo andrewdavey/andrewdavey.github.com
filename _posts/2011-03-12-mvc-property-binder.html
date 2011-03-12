@@ -5,7 +5,7 @@ title: MVC Property Binder
 <p>
 ASP.NET MVC has a rich model binder. Complex objects can be created from various bits of the HTTP request data. However, this isn't always enough and sometimes we need to extend the default binding behaviour.</p>
 <p>
-In my application, I have a data structure to represent a "change passwor" request.</p>
+In my application, I have a data structure to represent a "change password" request.</p>
 <code><pre class="brush: csharp">class ChangePassword {
   public string Username {get; set;}
   public string OldPassword {get; set;}
@@ -42,7 +42,7 @@ PropertyBinder is a basic attribute that lets me declare the model binder to use
 }</pre></code>
 <p>
 For this new attribute to work, I have to override the default model binder like this:</p>
-public class CustomModelBinder : DefaultModelBinder
+<code><pre class="brush: csharp">public class CustomModelBinder : DefaultModelBinder
 {
   protected override void BindProperty(ControllerContext controllerContext, ModelBindingContext bindingContext, System.ComponentModel.PropertyDescriptor propertyDescriptor)
   {
@@ -78,7 +78,7 @@ By overriding the BindProperty method, I can check for the attribute and call in
 <p>This line of code in Global.asax Application_Start to assign the new default binder:</p>
 <code><pre class="brush: csharp">System.Web.Mvc.ModelBinders.Binders.DefaultBinder = new CustomModelBinder();</pre></code>
 <p>
-Incidentally, the username binder looks something like this:</a>
+Incidentally, the username binder looks something like this:</p>
 <code><pre class="brush: csharp">public class ClientIdBinder : IModelBinder
 {
   readonly HttpContextBase httpContext;
@@ -100,3 +100,5 @@ Incidentally, the username binder looks something like this:</a>
     return null;
   }
 }</pre></code>
+
+<p>For more web development banter, with an MVC slant, <a href="http://twitter.com/andrewdavey">follow me on Twitter</a>!</p>
