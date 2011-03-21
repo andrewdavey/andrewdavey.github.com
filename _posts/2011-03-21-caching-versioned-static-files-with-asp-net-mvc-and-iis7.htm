@@ -11,11 +11,11 @@ modified" requests. These all add up to extra HTTP connection overhead.
 your static files are always cached correctly.</p>
 <h2>Using max-age</h2>
 <p>IIS7 is easy to configure from your web application's Web.config file. Find the &lt;configuration&gt;/&lt;system.webServer&gt; section and add:</p>
-<pre class="brush: xml"><code>&lt;staticContent&gt;
+<code><pre class="brush: xml">&lt;staticContent&gt;
     &lt;!-- Tell client to cache static files for a year --&gt;
     &lt;clientCache cacheControlMode="UseMaxAge"
                  cacheControlMaxAge="365.00:00:00" /&gt;
-&lt;/staticContent&gt;</code></pre>
+&lt;/staticContent&gt;</pre></code>
 <p>This tells IIS to add a cache-control header to all static files it serves.
 The header specifies the "max-age" of a file to be 365 days. So once a web browser
 has downloaded the file once, it won't request it again for a year.
@@ -30,14 +30,14 @@ files are downloaded again.</p>
 in the root of the website.</p>
 <p>Let's consider a file saved as "/static/styles/site.css". In our HTML, we'll 
 reference the stylesheet like this:</p>
-<pre class="brush: xml"><code>&lt;link href="/static/1.0.0.0/styles/site.css" type="text/css" rel="stylesheet"/&gt;</code></pre>
+<code><pre class="brush: xml">&lt;link href="/static/1.0.0.0/styles/site.css" type="text/css" rel="stylesheet"/&gt;</pre></code>
 <p>Notice the insertion of a version number. Since we're using ASP.NET, I find it
 convenient to use the application Assembly's version number. This is increased with each
 build and deployment, so it guarantees we won't ever use stale files.</p>
 <p>I'll show automate this URL how to generation later. Let's first see how to make
 IIS server the actual file from this modified URL.</p>
 <p>Add the following XML into your Web.config, in &lt;configuration&gt;/&lt;system.webServer&gt;:</p>
-<pre class="brush: xml"><code>&lt;rewrite&gt;
+<code><pre class="brush: xml">&lt;rewrite&gt;
     &lt;rules&gt;
         &lt;rule name="StaticFiles" stopProcessing="true"&gt;
             &lt;match url="static/[\d.]+/(.*)$" /&gt; 
@@ -45,7 +45,7 @@ IIS server the actual file from this modified URL.</p>
             &lt;!-- e.g. "static/1.9.8.4/styles/site.css" -&gt; "static/styles/site.css" --&gt;
         &lt;/rule&gt;
     &lt;/rules&gt;
-&lt;/rewrite&gt;</code></pre>
+&lt;/rewrite&gt;</pre></code>
 <p>This is using the IIS7 Rewrite Module. If you don't already have this already then 
 <a href="http://www.iis.net/download/URLRewrite">Install URL Rewrite</a>.</p>
 <p>As the comment in the XML explains we're matching static file urls that contain a 
@@ -54,7 +54,7 @@ text captured by "(.*)" in the match regular expression.</p>
 <h2>Generating versioned URLs</h2>
 <p>Manually maintain the version of each URL would be crazy. We can use an HTML helper 
 to generate the correct URLs for us. Add this helper to your MVC web application.</p>
-<pre class="brush: csharp"><code>using System.IO;
+<code><pre class="brush: csharp">using System.IO;
 using System.Reflection;
 using System.Web;
 using System.Web.Mvc;
@@ -105,7 +105,7 @@ namespace StaticDemo.Helpers // Change this namespace to match your web applicat
             return "/static/" + filename + separator + "nocache=" + version;
         }
     }
-}</code></pre>
+}</pre></code>
 <p>This HTML helper creates the static versioned URL for a filename. Notice that it
 behaves differently when the web application is in debug mode. While we're developing 
 a website we'll be in debug mode. In this case we don't want caching by application version number.
@@ -115,12 +115,12 @@ deploy your web application!</p>
 <p>Now make this helper available to your views. In "Views\Web.config", add your 
 helpers namespace into &lt;configuration&gt;/&lt;system.web.webPages.razor&gt;/&lt;pages&gt;/&lt;namespaces&gt; (for sexy Razor views),
 or &lt;configuration&gt;/&lt;system.web&gt;/&lt;pages&gt;/&lt;namespaces&gt; (for horrid old ASPX views).</p>
-<pre class="brush: xml"><code>&lt;add namespace="StaticDemo.Helpers"/&gt;</code></pre>
+<code><pre class="brush: xml">&lt;add namespace="StaticDemo.Helpers"/&gt;</pre></code>
 <p>Change the namespace to match your web application.</p>
 <p>Now in our Razor view we use the helper:</p>
-<pre class="brush: xml"><code>&lt;link href="@Url.StaticFile("styles/site.css")" rel="stylesheet" type="text/css" /&gt;</code></pre>
+<code><pre class="brush: xml">&lt;link href="@Url.StaticFile("styles/site.css")" rel="stylesheet" type="text/css" /&gt;</pre></code>
 <p>For those using ASPX views:</p>
-<pre class="brush: xml"><code>&lt;link href="&lt;%: Url.StaticFile("styles/site.css") %&gt;" rel="stylesheet" type="text/css" /&gt;</code></pre>
+<code><pre class="brush: xml">&lt;link href="&lt;%: Url.StaticFile("styles/site.css") %&gt;" rel="stylesheet" type="text/css" /&gt;</pre></code>
 
 <h2>That's it!</h2>
 <p>You now have elegantly versioned static files. 
