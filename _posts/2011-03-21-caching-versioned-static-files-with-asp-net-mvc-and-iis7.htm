@@ -1,0 +1,128 @@
+---
+layout: post
+title: Caching versioned static files with ASP.NET MVC and IIS7
+---
+<p>Correctly caching a website's content will improve the load time of pages.
+There's no sense in making a web browser download the same stylesheets and images 
+repeatedly. In fact, we want to avoid the web browser even doing tentative "if not
+modified" requests. These all add up to extra HTTP connection overhead.
+</p>
+<p>This article will show you how to configure IIS7 and use ASP.NET MVC to make sure 
+your static files are always cached correctly.</p>
+<h2>Using max-age</h2>
+<p>IIS7 is easy to configure from your web application's Web.config file. Find the &lt;configuration&gt;/&lt;system.webServer&gt; section and add:</p>
+<pre class="brush: xml"><code>&lt;staticContent&gt;
+    &lt;!-- Tell client to cache static files for a year --&gt;
+    &lt;clientCache cacheControlMode="UseMaxAge"
+                 cacheControlMaxAge="365.00:00:00" /&gt;
+&lt;/staticContent&gt;</code></pre>
+<p>This tells IIS to add a cache-control header to all static files it serves.
+The header specifies the "max-age" of a file to be 365 days. So once a web browser
+has downloaded the file once, it won't request it again for a year.
+</p>
+<h2>Versioning URLs</h2>
+<p>Websites change over time. We'll have a problem if we can't make a web browser 
+download an updated stylesheet, image or (worst of all) javascript file. Therefore 
+it's important to include a version number into the URL of any static file.</p>
+<p>When we update our website we can increment the version number to ensure the static
+files are downloaded again.</p>
+<p>For this article, we'll assume all static files are within a directory called "static"
+in the root of the website.</p>
+<p>Let's consider a file saved as "/static/styles/site.css". In our HTML, we'll 
+reference the stylesheet like this:</p>
+<pre class="brush: xml"><code>&lt;link href="/static/1.0.0.0/styles/site.css" type="text/css" rel="stylesheet"/&gt;</code></pre>
+<p>Notice the insertion of a version number. Since we're using ASP.NET, I find it
+convenient to use the application Assembly's version number. This is increased with each
+build and deployment, so it guarantees we won't ever use stale files.</p>
+<p>I'll show automate this URL how to generation later. Let's first see how to make
+IIS server the actual file from this modified URL.</p>
+<p>Add the following XML into your Web.config, in &lt;configuration&gt;/&lt;system.webServer&gt;:</p>
+<pre class="brush: xml"><code>&lt;rewrite&gt;
+    &lt;rules&gt;
+        &lt;rule name="StaticFiles" stopProcessing="true"&gt;
+            &lt;match url="static/[\d.]+/(.*)$" /&gt; 
+            &lt;action type="Rewrite" url="static/{R:1}" /&gt;
+            &lt;!-- e.g. "static/1.9.8.4/styles/site.css" -&gt; "static/styles/site.css" --&gt;
+        &lt;/rule&gt;
+    &lt;/rules&gt;
+&lt;/rewrite&gt;</code></pre>
+<p>This is using the IIS7 Rewrite Module. If you don't already have this already then 
+<a href="http://www.iis.net/download/URLRewrite">Install URL Rewrite</a>.</p>
+<p>As the comment in the XML explains we're matching static file urls that contain a 
+version number and rewriting to the actual file on disk. The "{R:1}" refers to the 
+text captured by "(.*)" in the match regular expression.</p>
+<h2>Generating versioned URLs</h2>
+<p>Manually maintain the version of each URL would be crazy. We can use an HTML helper 
+to generate the correct URLs for us. Add this helper to your MVC web application.</p>
+<pre class="brush: csharp"><code>using System.IO;
+using System.Reflection;
+using System.Web;
+using System.Web.Mvc;
+
+namespace StaticDemo.Helpers // Change this namespace to match your web application.
+{
+    public static class StaticFileHelper
+    {
+        static string assemblyVersion;
+
+        static StaticFileHelper()
+        {
+            // This way of getting the assembly version works in medium trust.
+            assemblyVersion = new AssemblyName(typeof(StaticFileHelper).Assembly.FullName).Version.ToString();
+        }
+
+        public static string StaticFile(this UrlHelper html, string filename)
+        {
+            var virtualPath = (
+                html.RequestContext.HttpContext.IsDebuggingEnabled
+                    ? DebugVirtualPath(filename, html.RequestContext.HttpContext.Server)
+                    : ReleaseVirtualPath(filename)
+            );
+
+            var root = html.RequestContext.HttpContext.Request.ApplicationPath;
+            if (root.Length > 1) // e.g. "/myapp" instead of just "/"
+            {
+                virtualPath = root + virtualPath;
+            }
+            return virtualPath;
+        }
+
+        static string ReleaseVirtualPath(string filename)
+        {
+            // Insert the assembly version into the path (not the query string).
+            // This seems to be more reliable when proxies are involved:
+            // http://www.stevesouders.com/blog/2008/08/23/revving-filenames-dont-use-querystring/
+            return "/static/" + assemblyVersion + "/" + filename;
+        }
+
+        static string DebugVirtualPath(string filename, HttpServerUtilityBase server)
+        {
+            // Use query string to break caching. This means the file's path
+            // still matches the development file system.
+            var absoluteFilename = server.MapPath("~/static/" + filename);
+            var version = File.GetLastWriteTime(absoluteFilename).Ticks.ToString();
+            var separator = (filename.Contains("?") ? "&" : "?");
+            return "/static/" + filename + separator + "nocache=" + version;
+        }
+    }
+}</code></pre>
+<p>This HTML helper creates the static versioned URL for a filename. Notice that it
+behaves differently when the web application is in debug mode. While we're developing 
+a website we'll be in debug mode. In this case we don't want caching by application version number.
+Instead the helper appends the last write time of the file.</p>
+<p>Always be sure to set &lt;configuration&gt;/&lt;system.web&gt;/&lt;compilation debug="false"&gt; when you
+deploy your web application!</p>
+<p>Now make this helper available to your views. In "Views\Web.config", add your 
+helpers namespace into &lt;configuration&gt;/&lt;system.web.webPages.razor&gt;/&lt;pages&gt;/&lt;namespaces&gt; (for sexy Razor views),
+or &lt;configuration&gt;/&lt;system.web&gt;/&lt;pages&gt;/&lt;namespaces&gt; (for horrid old ASPX views).</p>
+<pre class="brush: xml"><code>&lt;add namespace="StaticDemo.Helpers"/&gt;</code></pre>
+<p>Change the namespace to match your web application.</p>
+<p>Now in our Razor view we use the helper:</p>
+<pre class="brush: xml"><code>&lt;link href="@Url.StaticFile("styles/site.css")" rel="stylesheet" type="text/css" /&gt;</code></pre>
+<p>For those using ASPX views:</p>
+<pre class="brush: xml"><code>&lt;link href="&lt;%: Url.StaticFile("styles/site.css") %&gt;" rel="stylesheet" type="text/css" /&gt;</code></pre>
+
+<h2>That's it!</h2>
+<p>You now have elegantly versioned static files. 
+If you like what you've read <a href="http://twitter.com/andrewdavey">follow me on Twitter</a>
+for regular web development tips, ideas and rants.</p>
