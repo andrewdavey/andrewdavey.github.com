@@ -1,0 +1,44 @@
+---
+layout: post
+title: Managing JavaScript
+---
+<p>When it comes to writing rich web applications there is no escaping piles of JavaScript. I've come to quite like the language. However, managing hundreds of JS files is starting to get a bit annoying. In a large application there will be:</p>
+<ul>
+    <li>Third-party libraries, such as jQuery, knockout, backbone, ES5 polyfills, etc</li>
+    <li>Shared scripts used by all parts of the application</li>
+    <li>Collections of files for each "area" of the application</li>
+    <li>Custom scripts for single pages</li>
+</ul>
+<p>I expect to see a lot of JavaScript files in a well written project. As tempting as it is to stuff function after function into one poor file, please don't! Favour many smaller files that are scope limited and easy to understand.</p>
+<p>Working with JavaScript this way during development is very much at odds with production requirements. I like to keep each source file separate for sane debugging sessions. However, when deploying to production I want the scripts concatenated and minified into as few files as possible.</p>
+<p>Scripts files can depend on other script files. This means the order that scripts are loaded into a page matters.</p>
+
+<h2>Existing Solutions</h2>
+<p>I've used <a href="http://chirpy.codeplex.com/">Chirpy</a> in the past to build collections of JS files into logical units. However, this approach means I lose the one-to-one mapping of my original files. What's worse is that I have to manually maintain an XML file listing all the JS source files to build. This is tedious and feels like something the computer should do for me.</p>
+<p>Another alternative is <a href="https://github.com/jetheredge/SquishIt">SquishIt</a>. SquishIt handles the dev-time vs. production experience nicely by outputting each source script tag when in debug mode. In release mode, a single minified script file is generated instead.</p>
+<p>Unfortunately, SquishIt still requires each source file to be listed in the relevant order.</p>
+
+<h2>What I want to see</h2>
+<p>Let's get rid of manually listing all our source scripts for the purposes of concentration and minification. Instead move the intent closer to the actual scripts themselves.</p>
+<p>If I have a script that depends on another script then let's declare that in the depending script. Visual Studio provides a special XML comment syntax to do exactly this:</p>
+<code><pre class="brush:javascript">/// &ltreference path="myother.js"/&gt;
+MyOtherFunction(1,2,3);</pre></code>
+<p>Documenting my dependencies this way will save my sanity when I come back to this code in a years' time. Also, Visual Studio will now provide me with intellisense for any objects, functions, etc, exposed by the other script. This is a good thing since typos and dynamic languages do not mix!</p>
+<p>Also note that the references declaration is transient. If script C references script B, and script B references script A, then script C automatically gets a reference to script A as well. </p>
+<p>Next, clearly identify logical script file units. I listed examples of these at the start of this post. It makes sense to group the units of scripts into separate folders. E.g. ~/scripts/libs, ~/scripts/admin, ~/scripts/customers.</p>
+<p>Further sub-folders within those may still make sense for your project, but the top-level folder defines the unit. All files with a top-level folder will be concatenated in the correct order and minified into a single script.</p>
+
+<h2>Ordering the scripts</h2>
+<p>Remember the special "references" comments added to the scripts? We can use them to define a directed acyclic graph of dependencies. The scripts can then be topologically sorted and output in the correct order.</p>
+<p>The algorithm will need to account for dependencies between units. This means that the order that each unit is added into a page will be taken care of too.</p>
+
+<h2>Managing scripts</h2>
+<p>Maintaining a block of script tags in your HTML is fine for simple web pages. This does not scale for complex application with multiple regions, controls, components, etc. It's good practice to extract common bits of HTML into "partials". However, if a partial requires a script to be loaded into the page as well then we have a problem.</p>
+<p>Do not output script tags with your partial!</p>
+<p>Your partial needs to somehow register that it requires a script to be referenced from the page. The page will then add all the required script tags in one place.</p>
+<p>The page script manager must be aware of debug and release mode. In debug mode a script tag is created for each source script. In release mode the minified script of each unit is produced instead.</p>
+
+<h2>Solution?</h2>
+<p>Sorry to disappoint you, but this is all just ideas for now! I've had them floating around in my head and wanted to get them out in public for discussion.</p>
+<p>I'd love to hear about how you are managing JavaScript.</p>
+<p>Please let me know what you think in the comments or on Twitter <a href="http://twitter.com/andrewdavey">@andrewdavey</a>.</p>
