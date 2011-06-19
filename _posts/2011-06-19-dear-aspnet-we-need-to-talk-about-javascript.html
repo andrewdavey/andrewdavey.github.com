@@ -22,8 +22,9 @@ adding a project type.</p>
 <p><strong>I want File &gt; New JavaScript Project.</strong></p>
 <p>The result of Release building a JavaScript project should be a concatenated, 
 minified version of all the scripts. You will need to determine the file dependency
-ordering (take a look at <a href="http://aboutcode.net/knapsack">Knapsack</a>. 
-You already have the Ajax Minifier library, so reuse this.</p>
+ordering (take a look at <a href="http://aboutcode.net/knapsack">Knapsack</a>). 
+You already have the <a href="http://ajaxmin.codeplex.com/">Ajax Minifier</a> library, 
+so reuse this.</p>
 <p>Allow the Web Application Project types to link to a JavaScript project to get the scripts. 
 This could be similar to how Silverlight projects link to Web Application projects.</p>
 <p>Also, build in support for <a href="http://www.jslint.com/">JSLint</a> and 
@@ -33,7 +34,7 @@ display red squiggles in my code when I’m writing poor JavaScript.</p>
 <p>Get on the <a href="http://coffeescript.org/">CoffeeScript</a> bandwagon as soon as possible! 
 Rails already has. CoffeeScript makes writing JavaScript faster and easier to maintain.
 It’s a fantastic language.</p>
-<p>We need Visual Studio support for CoffeeScript i.e. syntax highlighting, 
+<p>I need Visual Studio support for CoffeeScript i.e. syntax highlighting, 
 intellisense and a project type. 
 I’ll also need to mix JavaScript and CoffeeScript in the same project because of existing
 libraries like jQuery.</p>
@@ -53,7 +54,7 @@ on every page feels like a huge waste of time. This needs to be done server-side
 or even at build time. The final JavaScript functions should be deployed just 
 like any other script files.</p>
 <p>The key to solving this problem is Razor.</p>
-<p>Razor totally nails HTML templating. We should be using it for both server
+<p><strong>Razor totally nails HTML templating.</strong> We should be using it for both server
 and client-side templates. The same templates could even be reusable on both sides.</p>
 <p>You just need to add JavaScript and (please, please, please) CoffeeScript
 support to the Razor parser. CoffeeScript will be an especially nice language 
@@ -66,7 +67,7 @@ like IronJS, Jurassic can be used.</p>
 
 <h2>Client-side Asset Management</h2>
 <p>Scripts, style sheets, images and HTML templates are the client-side assets 
-on a web application. The current ASP.NET story for these is “stuff them into
+of a web application. The current ASP.NET story for these is “stuff them into
 folders and deploy”. This is not good enough!</p>
 <p>Combining, minification, versioning, compression and caching, all matter for 
 production deployment. We need a solution that handles all that, whilst still 
@@ -77,8 +78,8 @@ minified, script is no fun at all!</p>
 Knapsack determines the dependency order of JavaScript files based on the
 XML reference comments. Much more needs to be done, but please take a look
 and either get involved or even steal ideas!</p>
-<p>I just want a solution. I need to get back to writing web applications 
-with .NET. Creating tools, frameworks and build processes is your job.</p>
+<p><strong>I just want a solution. I need to get back to writing web applications 
+with .NET. Creating tools, frameworks and build processes is your job.</strong></p>
 <p></p>
 <p>Best regards,</p>
 <p>Andrew Davey<br/>
