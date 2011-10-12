@@ -197,7 +197,7 @@ console.log( typeof customer.isSpecial ); // &gt; "undefined"</pre></code>
 
     // Return the defineClass function.
     return function (options) {
-        // public and private and reserved keywords, so the option properties must be 
+        // 'public' and 'private' are reserved keywords, so the option properties must be 
         // accessed using strings instead of options.public, for example.
         var proxyClass = createProxyClass(options["public"]),
             realClass = createRealClass(
@@ -209,7 +209,7 @@ console.log( typeof customer.isSpecial ); // &gt; "undefined"</pre></code>
         return realClass;
     };
 
-    }());</pre></code>
+}());</pre></code>
 
 <h2>Proxy Object</h2>
 <p>The key to how defineClass works lies with the "proxy" object pattern. A cute trick of JavaScript is that an object constructor function may return a different object, other than the one being constructed. So when creating a new Customer object, you actually get a CustomerProxy object. The real Customer object is hidden within the proxy.
@@ -220,3 +220,7 @@ console.log( typeof customer.isSpecial ); // &gt; "undefined"</pre></code>
 </p>
 <p>In addition, it is sometimes necessary to violate encapsulation. A common case is for serialization, which requires access to the private data of an object. It’s therefore useful to have an "escape valve".
 </p>
+
+<h2>Extensions</h2>
+<p>The approach given here could be extended to support inheritance and mixins.</p>
+<p>Feel free to use the code and extend it for your own purposes.</p>
