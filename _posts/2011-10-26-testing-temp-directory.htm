@@ -1,0 +1,56 @@
+---
+layout: post
+title: Testing with a Temporary Directory
+---
+<p>When testing a class that interacts with the file system, it’s useful to have a clean “temp” directory. We don’t want old files lying around, which could randomly break later tests.</p>
+<p>The System.IO.Path class has a static method GetTempPath. The returns the path of the system’s temporary folder. Rather than work directly in the temp directory, we can create a new, uniquely named, directory for each test. This makes cleaning up after the test easy – simply delete the directory.</p>
+<p>This repeated pattern of using a temporary directory can be encapsulated into a simple class.</p>
+<code><pre class="brush: csharp">class TempDirectory : IDisposable
+{
+    public TempDirectory()
+    {
+        path = Path.Combine(
+            Path.GetTempPath(),
+            Guid.NewGuid().ToString()
+        );
+        Directory.CreateDirectory(path);
+    }
+
+    readonly string path;
+
+    /// <summary>
+    /// Allows the TempDirectory to be used anywhere a string is required.
+    /// </summary>
+    public static implicit operator string(TempDirectory directory)
+    {
+        return directory.path;
+    }
+
+    public override string ToString()
+    {
+        return path;
+    }
+
+    public void Dispose()
+    {
+        Directory.Delete(path, true);
+    }
+}</pre></code>
+<p>Here’s a simple test using the TempDirectory class:</p>
+<code><pre class="brush: csharp">[Test]
+public void SimpleTest()
+{
+    using (var temp = new TempDirectory())
+    {
+        // Temp directory is used as a string...
+        File.WriteAllText(Path.Combine(temp, "file.txt"), "hello");
+        var widget = new FileWidget(temp);
+        widget.Load("file.txt");
+        Assert.AreEqual("hello", widget.Title);
+    }
+}</pre></code>
+<p>The TempDirectory creates a new, uniquely named, temporary directory. The class is disposable, so can be used in a using statement. This ensures the directory is deleted, even if the test code throws an unhandled exception.</p>
+<p>The implicit cast to string operator allows us to use the TempDirectory as if it were a string. When passing it as a string argument, the full path to the directory is used.</p>
+<p>This simple class could also be extended with methods that allow you to quickly set up temporary files as well.</p>
+<p>P.S. Obviously it’s a good idea to avoid spreading file I/O throughout all your objects! However, there will always be some point where performing real I/O is appropriate. I hope this simple class proves useful for testing those objects.</p>
+
