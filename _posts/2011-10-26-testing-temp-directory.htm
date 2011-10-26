@@ -3,7 +3,7 @@ layout: post
 title: Testing with a Temporary Directory
 ---
 <p>When testing a class that interacts with the file system, it’s useful to have a clean “temp” directory. We don’t want old files lying around, which could randomly break later tests.</p>
-<p>The System.IO.Path class has a static method GetTempPath. The returns the path of the system’s temporary folder. Rather than work directly in the temp directory, we can create a new, uniquely named, directory for each test. This makes cleaning up after the test easy – simply delete the directory.</p>
+<p>The System.IO.Path class has a static method GetTempPath. This returns the path of the system’s temporary folder. Rather than work directly in the temp directory, we can create a new, uniquely named, directory for each test. This makes cleaning up after the test easy – simply delete the directory.</p>
 <p>This repeated pattern of using a temporary directory can be encapsulated into a simple class.</p>
 <code><pre class="brush: csharp">class TempDirectory : IDisposable
 {
