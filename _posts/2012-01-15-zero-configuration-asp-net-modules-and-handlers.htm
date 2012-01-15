@@ -1,0 +1,71 @@
+---
+title: Zero-configuration ASP.NET modules and handlers
+layout: post
+---
+<p>A couple of my open source projects, <a href="http://getcassette.net/">Cassette</a> and 
+<a href="https://github.com/andrewdavey/notfoundmvc">Not Found MVC</a>, 
+add custom HTTP handlers and modules to the host application. 
+Cassette, for example, can return bundled assets from a route added to the ASP.NET RouteTable. 
+It does this without requiring any additions to Web.config or Application_Start in Global.asax.</p>
+<p>Removing the requirement of editing configuration or adding initialization code makes it simpler to use a library. 
+A developer can just reference the library and they're ready to go.</p>
+<p>Achieving this simplicity requires two handy libraries, called <a href="http://nuget.org/packages/WebActivator">WebActivator</a> 
+and <a href="http://nuget.org/packages/Microsoft.Web.Infrastructure">Microsoft.Web.Infrastructure</a>. 
+Both are available via Nuget.</p>
+<p>Using WebActivator's <code>PreApplicationStartMethod</code> attribute we can provide a method to run very early
+ in the web application's start up process. The method can use <code>DynamicModuleUtility</code>, 
+ from the <code>Microsoft.Web.Infrastructure</code> assembly to register HTTP modules.</p>
+<code><pre class="brush: csharp">[assembly: WebActivator.PreApplicationStartMethod( typeof(Example.StartUp), "PreApplicationStart")]
+namespace Example
+{
+    public static class StartUp
+    {
+        public static void PreApplicationStart()
+        {
+            DynamicModuleUtility.RegisterModule(typeof(MyHttpModule));
+        }
+    }
+}</pre></code>
+<p>HTTP modules are useful for adding functionality that applies to all requests. 
+For example, Cassette uses an HTTP module to rewrite HTML output of pages. 
+However, if you want handle your own custom URLs you need to create an HTTP handler hooked up via the ASP.NET routing system.</p>
+<p>Adding custom routes needs to happen after the application has itself finished starting up. 
+It's too early to add routes in the <code>PreApplicationStartMethod</code>. 
+Instead, use the <code>PostApplicationStartMethod</code> attribute also provided by WebActivator.</p>
+<p>The method specified in <code>PostApplicationStartMethod</code> is run after the web application's Application_Start method. 
+It's the ideal place to modify the route table.</p>
+<p>This is the attribute:</p>
+<code><pre class="brush: csharp">[assembly: WebActivator.PostApplicationStartMethod( typeof(Example.StartUp), "PostApplicationStart")]</pre></code>
+<p>And here's the method added to the <code>StartUp</code> class:</p>
+<code><pre class="brush: csharp">public static void PostApplicationStart()
+{
+    var route = new Route("my/url", new MyRouteHandler());
+    // Insert route at front of route list to avoid conflicts with application routes.
+    RouteTable.Routes.Insert(0, route);
+}</pre></code>
+<p>The application will have already defined its own routes, so we need to ensure our library's routes don't conflict. 
+For example, the application's "{controller}/{action}" route would capture something like <code>"my/url"</code>. 
+So if our library needs to handle that specific URL, then its route must be first in the route table.</p>
+<p>Another precaution you can take is to constrain your route to only match incoming requests. 
+The routing table is also used to generate URLs, so you may need to guard against unintended matches. Here's an example constraint:</p>
+<code><pre class="brush: csharp">class OnlyMatchIncomingRequestsConstraint : IRouteConstraint
+{
+    public bool Match(HttpContextBase httpContext, Route route, string parameterName, RouteValueDictionary values, RouteDirection routeDirection)
+    {
+        return routeDirection == RouteDirection.IncomingRequest;
+    }
+}</pre></code>
+<p>Use it like this:</p>
+<code><pre class="brush: csharp">var route = new Route(
+    "my/url",
+    new RouteValueDictionary(new { incoming = new OnlyMatchIncomingRequestsConstraint() }),
+    new MyRouteHandler()
+);</pre><code>
+
+<p>See these techniques in action in the source code of Cassette and NotFoundMVC over on GitHub:</p>
+<ul>
+    <li>https://github.com/andrewdavey/cassette</li>
+    <li>https://github.com/andrewdavey/NotFoundMvc</li>
+</ul>
+<p>Have you seen any other cool uses of WebActivator out there? Let me know in the comments!</p>
+
