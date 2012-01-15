@@ -14,7 +14,7 @@ and <a href="http://nuget.org/packages/Microsoft.Web.Infrastructure">Microsoft.W
 Both are available via Nuget.</p>
 <p>Using WebActivator's <code>PreApplicationStartMethod</code> attribute we can provide a method to run very early
  in the web application's start up process. The method can use <code>DynamicModuleUtility</code>, 
- from the <code>Microsoft.Web.Infrastructure</code> assembly to register HTTP modules.</p>
+ from the <code>Microsoft.Web.Infrastructure</code> assembly, to register HTTP modules.</p>
 <code><pre class="brush: csharp">[assembly: WebActivator.PreApplicationStartMethod( typeof(Example.StartUp), "PreApplicationStart")]
 namespace Example
 {
@@ -28,8 +28,8 @@ namespace Example
 }</pre></code>
 <p>HTTP modules are useful for adding functionality that applies to all requests. 
 For example, Cassette uses an HTTP module to rewrite HTML output of pages. 
-However, if you want handle your own custom URLs you need to create an HTTP handler hooked up via the ASP.NET routing system.</p>
-<p>Adding custom routes needs to happen after the application has itself finished starting up. 
+However, if you want to handle your own custom URLs you need to create an HTTP handler hooked up via the ASP.NET routing system.</p>
+<p>Adding custom routes needs to happen after the application itself has finished starting up. 
 It's too early to add routes in the <code>PreApplicationStartMethod</code>. 
 Instead, use the <code>PostApplicationStartMethod</code> attribute also provided by WebActivator.</p>
 <p>The method specified in <code>PostApplicationStartMethod</code> is run after the web application's Application_Start method. 
@@ -44,7 +44,7 @@ It's the ideal place to modify the route table.</p>
     RouteTable.Routes.Insert(0, route);
 }</pre></code>
 <p>The application will have already defined its own routes, so we need to ensure our library's routes don't conflict. 
-For example, the application's "{controller}/{action}" route would capture something like <code>"my/url"</code>. 
+For example, the application's <code>"{controller}/{action}"</code> route would capture something like <code>"my/url"</code>. 
 So if our library needs to handle that specific URL, then its route must be first in the route table.</p>
 <p>Another precaution you can take is to constrain your route to only match incoming requests. 
 The routing table is also used to generate URLs, so you may need to guard against unintended matches. Here's an example constraint:</p>
@@ -58,6 +58,7 @@ The routing table is also used to generate URLs, so you may need to guard agains
 <p>Use it like this:</p>
 <code><pre class="brush: csharp">var route = new Route(
     "my/url",
+    new RouteValueDictionary(),
     new RouteValueDictionary(new { incoming = new OnlyMatchIncomingRequestsConstraint() }),
     new MyRouteHandler()
 );</pre></code>
