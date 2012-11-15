@@ -1,0 +1,426 @@
+<h1>Twitter Bootstrap Modals and Knockout.js</h1>
+<p>
+    Displaying modal dialog boxes directly from your Knockout view models turns your
+    application into unmaintainable jQuery spaghetti. Your once clean view model, 
+    is now fighting with the DOM and dragging you into callback hell.
+</p>
+<p>
+    Imagine instead maintaining a clear separation of concerns between your view models
+    and your UI. Views models only need to collaborate with other view models, never with the DOM.
+</p>
+<p>
+    Keep your code clean and elegant - just like your application!
+</p>
+
+<h2>What you'll learn</h2>
+<p>
+    This post will teach you how to use Twitter Bootstrap modals in a Knockout.js application,
+    while keeping your code clean and simple.
+</p>
+<p>
+    You'll learn how to use Knockout's built-in function, <code>ko.renderTemplate</code>, 
+    to generate a modal dialog box UI, on-demand, from a template.
+</p>
+<p>
+    This post will also show how jQuery's Deferred object can neatly manage the asynchronous
+    nature of displaying a modal dialog and waiting for its result.
+</p>
+
+<h2>View model flow</h2>
+<p>
+    In this post, we'll be discussing the interaction between an application's root view model, 
+    which is data-bound to the page, and a separate view model, data-bound to a modal dialog.
+<p>
+    The flow of interaction when displaying a modal is shown below.    
+</p>
+<figure>
+    <img src="/images/modal-flow.png" alt="Modal interaction"/>
+    <figcaption>The viewmodel/view interaction of a modal dialog</figcaption>
+</figure>
+
+<h2>Twitter Bootstrap Modal</h2>
+<p>
+    Twitter Bootstrap provides a very nice looking <a href="http://twitter.github.com/bootstrap/javascript.html#modals">modal component</a>.
+    However, using the simple <code>$.fn.modal</code> jQuery plugin
+    directly from a Knockout view model can result in DOM code 
+    creeping in where it doesn't belong.
+</p>
+<p>
+    The Bootstrap modal plugin requires there to be an element in the
+    page which it will display as a modal dialog. This element will
+    look something like the following:
+</p>
+<figure>
+    <a href="/Images/modal.png"><img src="/Images/modal.png" alt="Modal Dialog Screenshot"/></a>
+    <figcaption>Screenshot of the modal dialog</figcaption>
+</figure>
+<p>
+    This UI is created by the following HTML.
+</p>
+<pre class="brush: xml">&lt;div class="modal hide fade"&gt;
+    &lt;div class="modal-header"&gt;
+        &lt;button type="button" class="close" aria-hidden="true" data-bind="click: cancel"&gt;&amp;times;&lt;/button&gt;
+        &lt;h3&gt;Add Note&lt;/h3&gt;
+    &lt;/div&gt;
+    &lt;div class="modal-body"&gt;
+        &lt;form action="#" data-bind="submit: add"&gt;
+            &lt;div class="control-group"&gt;
+                &lt;label class="control-label"&gt;New note:&lt;/label&gt;
+                &lt;div class="controls"&gt;
+                    &lt;textarea data-bind="value: text"&gt;&lt;/textarea&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class="control-group"&gt;
+                &lt;div class="controls"&gt;
+                    &lt;label class="checkbox"&gt;&lt;input type="checkbox" data-bind="checked: important" /&gt;Important&lt;/label&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+    &lt;div class="modal-footer"&gt;
+        &lt;a href="#" class="btn btn-primary" data-bind="click: add"&gt;Add Note&lt;/a&gt;
+        &lt;a href="#" class="btn" data-bind="click: cancel"&gt;Cancel&lt;/a&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+<p>
+    We need a way to dynamically generate this HTML at runtime and also
+    data bind it to a separate view model. Luckily Knockout provides
+    <code>ko.renderTemplate</code> to do exactly this.
+</p>
+        
+<h2>Rendering modal templates</h2>
+<p><code>ko.renderTemplate</code> accepts five arguments:</p>
+<table>
+    <tr>
+        <td>templateName</td>
+        <td>The ID of the template to render</td>
+    </tr>
+    <tr>
+        <td>viewModel</td>
+        <td>The view model to data bind to the template</td>
+    </tr>
+    <tr>
+        <td>options</td>
+        <td>Additional options passed to the rendering engine. We'll be providing an <code>afterRender</code> callback here.</td>
+    </tr>
+    <tr>
+        <td>target</td>
+        <td>Where to render the template, such as a <code>&lt;div&gt;</code> element.</td>
+    </tr>
+    <tr>
+        <td>renderMode</td>
+        <td>When this is <code>"replaceNode"</code> the target element is replaced with the rendered output.</td>
+    </tr>
+</table>
+<p>
+    The rendered elements do not necessarily appear in the DOM 
+    immediately. We have to provide an <code>afterRender</code> 
+    callback function via the options argument.
+</p>
+<pre class="brush: js">ko.renderTemplate(
+    "mytemplate",
+    viewModel,
+    {
+        afterRender: function(renderedElement) {
+            console.log("rendered!");
+        }
+    },
+    target,
+    "replaceNode"
+);</pre>
+        
+<p>
+    Let's wrap up this complexity in helper function that returns a
+    jQuery Deferred. This will make it easy to chain together
+    rendering of templates with code that uses the output.
+</p>
+<pre class="brush: js">var createModalElement = function(templateName, viewModel) {
+    var temporaryDiv = addHiddenDivToBody();
+    var deferredElement = $.Deferred();
+    ko.renderTemplate(
+        templateName,
+        viewModel,
+        // We need to know when the template has been rendered,
+        // so we can get the resulting DOM element.
+        // The resolve function receives the element.
+        { afterRender: deferredElement.resolve },
+        // The temporary div will get replaced by the rendered template output.
+        temporaryDiv,
+        "replaceNode"
+    );
+    // Return the deferred DOM element so callers can wait until it's ready for use.
+    return deferredElement;
+};
+
+var addHiddenDivToBody = function() {
+    var div = document.createElement("div");
+    div.style.display = "none";
+    document.body.appendChild(div);
+    return div;
+};</pre>
+
+<h2>The view models</h2>
+<p>
+    An application view model will be responsible for initiating the
+    display of a modal. It will create a separate view model object for the
+    modal and call a helper function to show the modal.
+</p>
+<p>
+    Here's a simple application view model that shows a modal:
+</p>
+<pre class="brush: js">var AppViewModel = function() {
+    this.notes = ko.observableArray();
+};
+
+AppViewModel.prototype.addNote = function() {
+    showModal({
+        viewModel: new AddNoteViewModel(),
+        context: this // Set context so we don't need to bind the callback function
+    }).then(this._addNoteToNotes);
+};
+
+AppViewModel.prototype._addNoteToNotes = function(newNote) {
+    this.notes.push(newNote);
+};</pre>
+<p>
+    This view model provides a method that can be bound to the click event of a button or link. 
+    It shows the modal dialog UI, which is data-bound to the given view model.
+    Then it waits for the modal to be closed with some result data.
+</p>
+<p>
+    We'll dive into the <code>showModal</code> function soon. 
+    For now, note that it is returning <strong>deferred object</strong> that is resolved when the 
+    modal has been closed. The modal is able to pass back a result, which in 
+    this case the application view model is adding to its notes array.
+</p>
+
+<p>
+    Here's the <code>AddNoteViewModel</code>, which will be data bound to the 
+    modal UI:
+</p>
+<pre class="brush: js">var AddNoteViewModel = function() {
+    this.text = ko.observable();
+    this.important = ko.observable();
+};
+    
+// The name of the template to render
+AddNoteViewModel.prototype.template = "AddNote";
+
+AddNoteViewModel.prototype.add = function () {
+    var newNote = {
+        text: this.text(),
+        important: this.important()
+    };
+    // Close the modal, passing the new note object as the result data.
+    this.modal.close(newNote);
+};
+
+AddNoteViewModel.prototype.cancel = function () {
+    // Close the modal without passing any result data.
+    this.modal.close();
+};</pre>
+
+<p>
+    The <code>AddNoteViewModel</code> provides the name of the template to 
+    render. This will be used by the <code>showModal</code> function.
+</p>
+<p>
+    The view model is also in control of when to close the modal.
+    It assumes that a <code>modal</code> property has been attached to itself.
+    This object contains a <code>close</code> method that is used to close the
+    modal and optionally pass a result.
+</p>
+
+<h2>The <code>showModal</code> function</h2>
+<p>Here's the <code>showModal</code> function:</p>
+<pre class="brush: js">var showModal = function(options) {
+    if (typeof options === "undefined") throw new Error("An options argument is required.");
+    if (typeof options.viewModel !== "object") throw new Error("options.viewModel is required.");
+
+    var viewModel = options.viewModel;
+    var template = options.template || viewModel.template;
+    var context = options.context;
+        
+    if (!template) throw new Error("options.template or options.viewModel.template is required.");
+        
+    return createModalElement(template, viewModel)
+        .pipe($) // jQueryify the DOM element
+        .pipe(function($ui) {
+            var deferredModalResult = $.Deferred();
+            addModalHelperToViewModel(viewModel, deferredModalResult, context);
+            showTwitterBootstrapModal($ui);
+            whenModalResultCompleteThenHideUI(deferredModalResult, $ui);
+            whenUIHiddenThenRemoveUI($ui);
+            return deferredModalResult;
+        });
+};</pre>
+<p>
+    After some standard pre-condition validation, the function starts the
+    process of showing the modal. The <code>pipe</code> method provides a nice
+    way to chain together a set of deferred operations.
+</p>
+<p>
+    First, the modal element creation is started. Once Knockout has finished 
+    updating the DOM, the next operation in the pipeline runs.
+</p>
+<p>
+    The call to <code>pipe($)</code> is equivalent to:
+</p>
+<pre class="brush: js">pipe(function(modalElement) {
+    return $(modalElement);
+})</pre>
+<p>
+    Because this returns a non-deferred value, the next stage of the 
+    pipeline executes immediately after.
+</p>
+<p>
+    The final stage of the pipline creates a new deferred object that will
+    contain the result of the modal when it is closed. A helper object is
+    attached to the view model so it is able to close the modal.
+</p>
+<pre class="brush: js">var addModalHelperToViewModel = function (viewModel, deferredModalResult, context) {
+    // Provide a way for the viewModel to close the modal and pass back a result.
+    viewModel.modal = {
+        close: function (result) {
+            if (typeof result !== "undefined") {
+                deferredModalResult.resolveWith(context, [result]);
+            } else {
+                // When result is undefined, we don't want any `done` callbacks of
+                // the deferred being called. So reject instead of resolve.
+                deferredModalResult.rejectWith(context, []);
+            }
+        }
+    };
+};</pre>
+<p>
+    The deferred object's <code>resolveWith</code> method is used to provide a
+    useful value for <code>this</code> in any callback functions.
+    The <code>context</code> value was provided to the <code>showModal</code>
+    function via its options argument.
+</p>
+<p>
+    The signature of <code>resolveWith</code> is similar to 
+    <code>Function.prototype.apply</code> i.e. the arguments must be passed as
+    an array.
+</p>
+<p>
+    Sometimes a user will need to cancel a modal. To handle this case, 
+    <code>close</code> can be called with an undefined result. The deferred 
+    modal result is then rejected, instead of resolved. This means that the
+    "happy path" in the application view model doesn't need to check for a
+    cancelled modal. Cancelling can be detected by providing a <code>fail</code>
+    callback instead.
+</p>
+<pre class="brush: js">showModal({ viewModel: new ModalViewModel() })
+    .done(function(result) {
+        console.log("Modal closed with result: " + result);
+    })
+    .fail(function() {
+        console.log("Modal cancelled");
+    });
+</pre>
+
+<p>The remaining helper functions called by <code>showModal</code> are listed below:</p>
+<pre class="brush: js">var showTwitterBootstrapModal = function($ui) {
+    // Display the modal UI using Twitter Bootstrap's modal plug-in.
+    $ui.modal({
+        // Clicking the backdrop, or pressing Escape, shouldn't automatically close the modal by default.
+        // The view model should remain in control of when to close.
+        backdrop: "static",
+        keyboard: false
+    });
+};
+    
+var whenModalResultCompleteThenHideUI = function (deferredModalResult, $ui) {
+    // When modal is closed (with or without a result)
+    // Then always hide the UI.
+    deferredModalResult.always(function () {
+        $ui.modal("hide");
+    });
+};
+
+var whenUIHiddenThenRemoveUI = function($ui) {
+    // Hiding the modal can result in an animation.
+    // The `hidden` event is raised after the animation finishes,
+    // so this is the right time to remove the UI element.
+    $ui.on("hidden", function() {
+        $ui.remove();
+    });
+};</pre>
+<p>
+    When a modal is closed, it is removed from the DOM to free up memory.
+    However, Twitter Bootstrap modal's <code>hide</code> method will animate
+    the hiding. Instant removal would prevent this nice effect.
+</p>
+<p>
+    A two-step approach is used to remove the modal once the deferred result 
+    has been resolved or rejected. The Bootstrap modal "hide" method is called.
+    This will raise the "hidden" event once the animation has finished. At that
+    point we can remove the modal's DOM element.
+</p>
+
+<h2>Extensions and ideas</h2>
+<p>
+    The use of <code>ko.renderTemplate</code> to dynamically generate UI can be
+    generalised for other components. For example, 
+    <a target="_blank" href="http://twitter.github.com/bootstrap/javascript.html#popovers">Twitter Bootstrap Popovers</a>.
+</p>
+<p>
+    Occasionally one modal will need to display another modal. There are two 
+    possible flows to consider:
+</p>
+<ol>
+    <li>Close the first modal, then show the second.</li>
+    <li>Stack the second modal on top of the first.</li>
+</ol>
+<aside>
+    Be careful, this is not always a great user experience.
+    Avoid stacking up lots of modals on top of each other!
+</aside>
+<p>
+    In the first case, the modal's deferred result object must be passed onto
+    the second modal. The application view model shouldn't resume until the 
+    second modal has been closed.
+</p>
+<p>
+    The modal helper object assigned to view models could be extended to
+    support this scenario. Here's a possible API:
+</p>
+<pre class="brush: js">FirstViewModel.prototype.showSecond = function() {
+    this.modal.closeCurrentAndShowModal(new SecondViewModel());
+    // The first modal is now removed from the DOM.
+};</pre>
+<p>
+    The second case is somewhat simpler. A separate deferred result object is
+    created for the second modal. The first modal remains in the background,
+    ready handle the result when the second modal is closed.
+</p>
+<p>
+    Again, the modal helper object could be enhanced to support this behavior:
+</p>
+<pre class="brush: js">FirstViewModel.prototype.showSecond = function() {
+    this.modal.showNestedModal(new SecondViewModel());
+    // The first modal is still loaded, but hidden until the second is closed.
+};</pre>
+<p>
+    To prevent Twitter Bootstrap adding multiple backdrop overlays to the page,
+    the first modal could be hidden, but not removed, while the second modal is
+    displayed.
+</p>
+
+<h2>Thanks for reading</h2>
+<p>
+    I hope you found this post useful. Let me know in the comments, or on twitter 
+    <a href="https://twitter.com/andrewdavey">@andrewdavey</a>.
+    Feel free to copy, modify and use the code in your applications.
+</p>
+
+<h2>HTML Template Compiler</h2>
+<p>
+    Are you tired of hunting through reams of HTML looking for your templates?
+    Would you like to store them as separate files instead, and improve your application's performance too?
+</p>
+<p>
+    I'm creating a new library to help you! Check out  
+    <a href="http://htmltemplatecompiler.com">HTML Template Compiler</a>.
+</p>
