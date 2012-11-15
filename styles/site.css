@@ -115,7 +115,7 @@ em {
 }
 
 #content code {
-  font-size: .7em;
+  font-family: Consolas, Inconsolata, monospace;
 }
 
 #content pre {
