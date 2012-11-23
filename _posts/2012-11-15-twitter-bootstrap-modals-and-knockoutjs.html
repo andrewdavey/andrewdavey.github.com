@@ -146,7 +146,15 @@ layout: post
         // We need to know when the template has been rendered,
         // so we can get the resulting DOM element.
         // The resolve function receives the element.
-        { afterRender: deferredElement.resolve },
+        {
+            afterRender: function (nodes) {
+                // Ignore any #text nodes before and after the modal element.
+                var elements = nodes.filter(function(node) {
+                     return node.nodeType === 1; // Element
+                });
+                deferredElement.resolve(elements[0]);
+            }
+        },
         // The temporary div will get replaced by the rendered template output.
         temporaryDiv,
         "replaceNode"
