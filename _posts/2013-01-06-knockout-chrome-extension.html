@@ -67,13 +67,13 @@ The <code>popup.html</code> page serves as a container for the sandboxed applica
 &lt;html&gt;
   &lt;head&gt;
     &lt;script src="popup.js"&gt;&lt;/script&gt;
-  /&lt;head&gt;
+  &lt;head&gt;
   &lt;body style="padding: 0"&gt;
     &lt;iframe src="app.html" id="app" seamless&gt;&lt;/iframe&gt;
-  /&lt;body&gt;
-/&lt;html&gt;</pre>
+  &lt;body&gt;
+&lt;html&gt;</pre>
 <p>
-Note the handy HTML5 <code>seamless</code> attribute on the <code>&gt;iframe&lt;</code> tag.
+Note the handy HTML5 <code>seamless</code> attribute on the <code>&lt;iframe&gt;</code> tag.
 This removes all borders and scrollbars.
 </p>
 
@@ -100,7 +100,7 @@ chrome.topSites.get(function(topSites) {
   appWindow.postMessage({ displayLinks: topSites }, "*");
 });</pre>
 <p>
-MDN have great documentation about the <a href="https://developer.mozilla.org/en-US/docs/DOM/window.postMessage">window.postMessage method</a>.
+MDN has great documentation about the <a href="https://developer.mozilla.org/en-US/docs/DOM/window.postMessage">window.postMessage method</a>.
 </p>
 <p>
 In the application script, we can listen for this message:
@@ -121,7 +121,7 @@ window.addEventListener(
 
 ko.applyBindings(app);</pre> 
 <p>
-Similarly, the application can post messages to the unsandboxed script via
+Similarly, the application can post messages to the un-sandboxed script via
 the <code>parent</code> window property. For example:
 </p>
 <pre class="brush: js">window.parent.postMessage({ example: true }, "*")</pre>
@@ -141,7 +141,7 @@ containing code samples, which you can copy and use in your own projects.
       <input id="email-address" type="email" name="EMAIL" required />
       <button type="submit">Subscribe</button>
     </fieldset>
-    <p style="font-size: .8em">
+    <p style="font-size: .8em; margin-top: 10px">
     No spam, just occasional web development tips, posts and sample code.
     Unsubscribe at any time.
     </p>
