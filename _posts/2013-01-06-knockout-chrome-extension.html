@@ -25,7 +25,7 @@ restricted features.
 To sandbox an HTML page, we need to mention it in the extension's <code>manifest.json</code> file.
 Here's an example manifest that sandboxes a file named <code>app.html</code>.
 </p>
-<pre class="brush: js"><code>{
+<pre class="brush: js">{
   "name": "Knockout Chrome Extension",
   "version": "0.1",
   "manifest_version": 2,
@@ -34,7 +34,7 @@ Here's an example manifest that sandboxes a file named <code>app.html</code>.
     "pages": ["app.html"]
   }</strong>,
   ...
-}</code></pre>
+}</pre>
 <p>
 The <code>app.html</code> page can now reference <code>knockout.js</code> and your other scripts. These referenced files are then also sandboxed.
 However, it can no longer be loaded directly into your extension's browser action pop-up, or be displayed in a tab.
@@ -48,7 +48,7 @@ A sandboxed HTML page needs to be loaded from a non-sandboxed page, using an <co
 For example, the extension can have a browser action pop-up, 
 specified by the following part of the <code>manifest.json</code>:
 </p>
-<pre class="brush: js"><code>{
+<pre class="brush: js">{
   ...
   "browser_action": {
     <strong>"default_popup": "popup.html"</strong>,
@@ -59,11 +59,11 @@ specified by the following part of the <code>manifest.json</code>:
     }
   },
   ...
-}</code></pre>
+}</pre>
 <p>
 The <code>popup.html</code> page serves as a container for the sandboxed application page.
 </p>
-<pre class="brush: html"><code>&lt;!DOCTYPE html&gt;
+<pre class="brush: html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
   &lt;head&gt;
     &lt;script src="popup.js"&gt;&lt;/script&gt;
@@ -71,7 +71,7 @@ The <code>popup.html</code> page serves as a container for the sandboxed applica
   &lt;body style="padding: 0"&gt;
     &lt;iframe src="app.html" id="app" seamless&gt;&lt;/iframe&gt;
   /&lt;body&gt;
-/&lt;html&gt;</code></pre>
+/&lt;html&gt;</pre>
 <p>
 Note the handy HTML5 <code>seamless</code> attribute on the <code>&gt;iframe&lt;</code> tag.
 This removes all borders and scrollbars.
@@ -95,17 +95,17 @@ To communicate between sandboxed and un-sandboxed windows, you have to use messa
 Here's a snippet from <code>popup.js</code>, loaded by <code>popup.html</code>, 
 which calls a Chrome API and then posts a message to the application.
 </p>
-<pre class="brush: js"><code>var appWindow = document.getElementById("app").contentWindow;
+<pre class="brush: js">var appWindow = document.getElementById("app").contentWindow;
 chrome.topSites.get(function(topSites) {
   appWindow.postMessage({ displayLinks: topSites }, "*");
-});</code></pre>
+});</pre>
 <p>
 MDN have great documentation about the <a href="https://developer.mozilla.org/en-US/docs/DOM/window.postMessage">window.postMessage method</a>.
 </p>
 <p>
 In the application script, we can listen for this message:
 </p>
-<pre class="brush: js"><code>var app = {
+<pre class="brush: js">var app = {
   links: ko.observableArray()
 };
 
@@ -119,12 +119,12 @@ window.addEventListener(
   false
 );
 
-ko.applyBindings(app);</code></pre> 
+ko.applyBindings(app);</pre> 
 <p>
 Similarly, the application can post messages to the unsandboxed script via
 the <code>parent</code> window property. For example:
 </p>
-<pre class="brush: js"><code>window.parent.postMessage({ example: true }, "*")</code><pre>
+<pre class="brush: js">window.parent.postMessage({ example: true }, "*")</pre>
 
 <h2>Full sample code</h2>
 <p>
