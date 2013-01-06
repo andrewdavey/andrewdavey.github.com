@@ -1,0 +1,140 @@
+---
+title: Google Chrome extensions using KnockoutJS
+layout: post
+---
+<p>
+Attempting to use KnockoutJS within a Google Chrome extension will swiftly
+result in the following error message.
+</p>
+<pre>Uncaught Error: Unable to parse bindings.
+Message: Error: Code generation from strings disallowed for this context;</pre>
+<p>
+This is due to Chrome's <a href="http://code.google.com/chrome/extensions/contentSecurityPolicy.html">Content Security Policy</a>
+for extensions. Essentially, it blocks the use of <code>eval</code> and 
+<code>new Function</code>, which means features like Knockout's template 
+engine and data-bindings won't work.
+</p>
+
+<h2>Sandboxing your application</h2>
+<p>
+The solution to using KnockoutJS in a Google Chrome extension is to <em>sandbox</em> the extension's HTML page and javascript.
+This isolates them from the rest of the extension and allows the use of previously 
+restricted features.
+</p>
+<p>
+To sandbox an HTML page, we need to mention it in the extension's <code>manifest.json</code> file.
+Here's an example manifest that sandboxes a file named <code>app.html</code>.
+</p>
+<pre class="brush: js"><code>{
+  "name": "Knockout Chrome Extension",
+  "version": "0.1",
+  "manifest_version": 2,
+  "description": "An example extension that uses KnockoutJS",
+  <strong>"sandbox": {
+    "pages": ["app.html"]
+  }</strong>,
+  ...
+}</code></pre>
+<p>
+The <code>app.html</code> page can now reference <code>knockout.js</code> and your other scripts. These referenced files are then also sandboxed.
+However, it can no longer be loaded directly into your extension's browser action pop-up, or be displayed in a tab.
+</p>
+
+<h2>Loading the sandboxed application</h2>
+<p>
+A sandboxed HTML page needs to be loaded from a non-sandboxed page, using an <code>&lt;iframe&gt;</code>.
+</p>
+<p>
+For example, the extension can have a browser action pop-up, 
+specified by the following part of the <code>manifest.json</code>:
+</p>
+<pre class="brush: js"><code>{
+  ...
+  "browser_action": {
+    <strong>"default_popup": "popup.html"</strong>,
+    "default_title": "Knockout Chrome Extension",
+    "default_icon": {
+      "19": "icon19.png",
+      "38": "icon38.png"
+    }
+  },
+  ...
+}</code></pre>
+<p>
+The <code>popup.html</code> page serves as a container for the sandboxed application page.
+</p>
+<pre class="brush: html"><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;script src="popup.js"&gt;&lt;/script&gt;
+  /&lt;head&gt;
+  &lt;body style="padding: 0"&gt;
+    &lt;iframe src="app.html" id="app" seamless&gt;&lt;/iframe&gt;
+  /&lt;body&gt;
+/&lt;html&gt;</code></pre>
+<p>
+Note the handy HTML5 <code>seamless</code> attribute on the <code>&gt;iframe&lt;</code> tag.
+This removes all borders and scrollbars.
+</p>
+
+<h2>Communicating with the application</h2>
+<p>
+Anything loaded by a sandboxed page, such as scripts, are also sandboxed.
+This means your application script won't be able to use any of the Chrome
+APIs.
+</p>
+<p>
+Scripts loaded by the un-sandboxed <code>popup.html</code> do have access
+to the Chrome APIs. Therefore, if your application needs to interact with
+Chrome, it has to get the un-sandboxed script to do so.
+</p>
+<p>
+To communicate between sandboxed and un-sandboxed windows, you have to use messages.
+</p>
+<p>
+Here's a snippet from <code>popup.js</code>, loaded by <code>popup.html</code>, 
+which calls a Chrome API and then posts a message to the application.
+</p>
+<pre class="brush: js"><code>var appWindow = document.getElementById("app").contentWindow;
+chrome.topSites.get(function(topSites) {
+  appWindow.postMessage({ displayLinks: topSites }, "*");
+});</code></pre>
+<p>
+MDN have great documentation about the <a href="https://developer.mozilla.org/en-US/docs/DOM/window.postMessage">window.postMessage method</a>.
+</p>
+<p>
+In the application script, we can listen for this message:
+</p>
+<pre class="brush: js"><code>var app = {
+  links: ko.observableArray()
+};
+
+window.addEventListener(
+  "message",
+  function(event) {
+    if (event.data.displayLinks) {
+      app.links(event.data.displayLinks);
+    }
+  },
+  false
+);
+
+ko.applyBindings(app);</code></pre> 
+<p>
+Similarly, the application can post messages to the unsandboxed script via
+the <code>parent</code> window property. For example:
+</p>
+<pre class="brush: js"><code>window.parent.postMessage({ example: true }, "*")</code><pre>
+
+<h2>Full sample code</h2>
+<p>
+To get the full sample code for a simple extension that uses KnockoutJS, join my 
+web development mailing list. I'll give you access to a private GitHub repository
+containing code samples.
+</p>
+
+<form method="post" action="http://insighttracking.us2.list-manage.com/subscribe/post?u=bfb32cd1f0342aa0f65c992ca&amp;id=f411a37d62" target="_blank">
+  <label for="email-address">Email address</label>
+  <input id="email-address" type="email" name="EMAIL" required />
+  <button type="submit">Subscribe</button>
+</form>
