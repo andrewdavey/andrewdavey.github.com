@@ -152,3 +152,16 @@ em {
   margin-left: 0;
   list-style-type: none;
 }
+
+form label {
+  display: inline-block;
+  min-width: 160px;
+}
+
+form .field {
+  margin-bottom: 5px;
+}
+
+form .form-actions {
+  padding-left: 160px;
+}
