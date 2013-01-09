@@ -1,0 +1,108 @@
+---
+title: Load images with jQuery Deferred
+layout: post
+---
+<p>
+Have you ever needed to know the dimensions of an image in JavaScript?
+In the past, you may have used code like this:
+</p>
+<pre class="brush: js">var image = new Image();
+image.onload = function() {
+  alert("Loaded image: " + image.width + "x" + image.height);
+};
+image.src = "/my-image.png";</pre>
+<p>
+This is okay for very basic scenarios, but it becomes tricky to handle things like:
+</p>
+<ul>
+  <li>Notifying more than one part of your application when the image is loaded</li>
+  <li>Error handling</li>
+  <li>Loading multiple images in parallel</li>
+  <li>Chaining together a sequence of asynchronous operations</li>
+</ul>
+<p>
+I also dislike the backwards nature of writing the callback function <em>before</em>
+assigning the <code>src</code> property. This is essential however, because 
+image loading is asynchronous and could potentially finish before your callback was
+assigned to <code>onload</code>.
+</p>
+<p>
+Fortunately, there is a cleaner way to handle this.
+</p>
+
+<h2>Using jQuery Deferred</h2>
+<p>
+The jQuery <a href="http://api.jquery.com/category/deferred-object/">Deferred object</a> is perfect for wrapping up asynchronously operations, such as image loading.
+The Deferred object provides a consistent API for working with asynchronous operations. It results in very readable code.
+</p>
+<p>
+Here's what it's like to load an image using a jQuery deferred object.
+</p>
+<pre class="brush: js">$.loadImage("/my-image.png")
+.done(function(image) {
+  alert("Loaded image: " + image.width + "x" + image.height);
+})
+.fail(function(image) {
+  alert("Failed to load image");
+});</pre>
+
+<p>
+jQuery deferred's are easy to chain together using the <code>pipe</code> function.
+For example, we imagine we need the dimensions of a user's avatar image.
+But first we need to the image URL from a profile retrieved via ajax...
+</p>
+<pre class="brush: js">var avatarDimensions = $.get("/user-profile")
+  .pipe(function(profile) {
+    return $.loadImage(profile.avatarUrl);
+  })
+  .pipe(function(avatarImage) {
+    return { width: avatarImage.width, height: avatarImage.height };
+  });
+
+// avatarDimensions is a deferred object.
+avatarDimensions.done(function(dimensions) {
+  console.log(dimensions);
+});</pre>
+
+<h2>Implementing $.loadImage</h2>
+<p>
+Here's the code for <code>$.loadImage</code>.
+It assumes you have already included jQuery 1.5 or newer in your page.
+</p>
+<pre class="brush: js">$.loadImage = function(url) {
+  // Define a "worker" function that should eventually resolve or reject the deferred object.
+  var loadImage = function(deferred) {
+    var image = new Image();
+    
+    // Set up event handlers to know when the image has loaded
+    // or fails to load due to an error or abort.
+    image.onload = loaded;
+    image.onerror = errored; // URL returns 404, etc
+    image.onabort = errored; // IE may call this if user clicks "Stop"
+    
+    // Setting the src property begins loading the image.
+    image.src = url;
+    
+    function loaded() {
+      unbindEvents();
+      // Calling resolve means the image loaded sucessfully and is ready to use.
+      deferred.resolve(image);
+    }
+    function errored() {
+      unbindEvents();
+      // Calling reject means we failed to load the image (e.g. 404, server offline, etc).
+      deferred.reject(image);
+    }
+    function unbindEvents() {
+      // Ensures the event callbacks only get called once.
+      image.onload = null;
+      image.onerror = null;
+      image.onabort = null;
+    }
+  };
+  
+  // Create the deferred object that will contain the loaded image.
+  // We don't want callers to have access to the resolve() and reject() methods, 
+  // so convert to "read-only" by calling `promise()`.
+  return $.Deferred(loadImage).promise();
+};</pre>
