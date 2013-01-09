@@ -32,8 +32,9 @@ Fortunately, there is a cleaner way to handle this.
 
 <h2>Using jQuery Deferred</h2>
 <p>
-The jQuery <a href="http://api.jquery.com/category/deferred-object/">Deferred object</a> is perfect for wrapping up asynchronously operations, such as image loading.
-The Deferred object provides a consistent API for working with asynchronous operations. It results in very readable code.
+The jQuery <a href="http://api.jquery.com/category/deferred-object/">deferred object</a> is perfect for wrapping up asynchronous operations, such as image loading.
+The deferred object provides a consistent API for adding callbacks and chaining operations.
+It results in very readable code.
 </p>
 <p>
 Here's what it's like to load an image using a jQuery deferred object.
@@ -48,7 +49,7 @@ Here's what it's like to load an image using a jQuery deferred object.
 
 <p>
 jQuery deferred's are easy to chain together using the <code>pipe</code> function.
-For example, we imagine we need the dimensions of a user's avatar image.
+For example, imagine we need the dimensions of a user's avatar image.
 But first we need to the image URL from a profile retrieved via ajax...
 </p>
 <pre class="brush: js">var avatarDimensions = $.get("/user-profile")
