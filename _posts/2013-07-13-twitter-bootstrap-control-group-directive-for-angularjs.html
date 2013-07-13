@@ -8,10 +8,10 @@ layout: post
 </p>
 
 <pre>&lt;div class="control-group"&gt;
-&lt;label class="control-label" for="example"&gt;Example&lt;/label&gt;
-&lt;div class="controls"&gt;
-    &lt;input type="text" id="example" /&gt;
-&lt;/div&gt;
+    &lt;label class="control-label" for="example"&gt;Example&lt;/label&gt;
+    &lt;div class="controls"&gt;
+        &lt;input type="text" id="example" /&gt;
+    &lt;/div&gt;
 &lt;/div&gt;</pre>
 
 <p>
@@ -20,7 +20,7 @@ layout: post
 </p>
 
 <pre>&lt;div control-group label="Example"&gt;
-&lt;input type="text" id="example" /&gt;
+    &lt;input type="text" id="example" /&gt;
 &lt;/div&gt;</pre>
 
 <p>
@@ -35,28 +35,28 @@ layout: post
 <pre>var app = angular.module("app", []);
 
 app.directive("controlGroup", function() {
-return {
-    template: 
-    '&lt;div class="control-group"&gt;\
-        &lt;label class="control-label" for="{{for}}"&gt;{{label}}&lt;/label&gt;\
-        &lt;div class="controls" ng-transclude&gt;&lt;/div&gt;\
-    &lt;/div&gt;',
+    return {
+        template: 
+        '&lt;div class="control-group"&gt;\
+            &lt;label class="control-label" for="{{for}}"&gt;{{label}}&lt;/label&gt;\
+            &lt;div class="controls" ng-transclude&gt;&lt;/div&gt;\
+        &lt;/div&gt;',
 
-    replace: true,
-    transclude: true,
+        replace: true,
+        transclude: true,
 
-    scope: {
-        label: "@" // Gets the string contents of the `label` attribute.
-    },
+        scope: {
+            label: "@" // Gets the string contents of the `label` attribute.
+        },
 
-    link: function (scope, element) {
-        // The &lt;label&gt; should have a `for` attribute that links it to the input.
-        // Get the `id` attribute from the input element
-        // and add it to the scope so our template can access it.
-        var id = element.find(":input").attr("id");
-        scope.for = id;
-    }
-};
+        link: function (scope, element) {
+            // The &lt;label&gt; should have a `for` attribute that links it to the input.
+            // Get the `id` attribute from the input element
+            // and add it to the scope so our template can access it.
+            var id = element.find(":input").attr("id");
+            scope.for = id;
+        }
+    };
 });</pre>
 
 <p>
@@ -78,9 +78,9 @@ return {
 </p>
 
 <pre>&lt;form name="form" class="form-horizontal" ng-controller="ExampleController"&gt;
-&lt;div control-group label="Example"&gt;
-    &lt;input type="text" ng-model="data.example" id="example" name="example" required /&gt;
-&lt;/div&gt;
+    &lt;div control-group label="Example"&gt;
+        &lt;input type="text" ng-model="data.example" id="example" name="example" required /&gt;
+    &lt;/div&gt;
 &lt;/form&gt;></pre>
 
 <p>
@@ -88,9 +88,9 @@ return {
 </p>
 
 <pre>app.controller("ExampleController", ["$scope", function($scope) {
-$scope.data = {
-    example: ""
-};
+    $scope.data = {
+        example: ""
+    };
 }]);</pre>
 
 <p>
@@ -170,15 +170,15 @@ link: function(scope, element, attrs, formController) {
     Here's an example of it in use:
 </p>
 <pre>&lt;div control-group label="Example"&gt;
-&lt;input type="text" ng-model="data.example" name="example" required/&gt;
-&lt;span validation-error-for="required"&gt;This input is required&lt;/span&gt;
+    &lt;input type="text" ng-model="data.example" name="example" required/&gt;
+    &lt;span validation-error-for="required"&gt;This input is required&lt;/span&gt;
 &lt;/div&gt;</pre>
 <p>
     It expands into the following mark-up:
 </p>
 <pre>&lt;div control-group label="Example"&gt;
-&lt;input type="text" ng-model="data.example" name="example" required/&gt;
-&lt;span class="help-inline" ng-show="form.example.$error.required"&gt;This input is required&lt;/span&gt;
+    &lt;input type="text" ng-model="data.example" name="example" required/&gt;
+    &lt;span class="help-inline" ng-show="form.example.$error.required"&gt;This input is required&lt;/span&gt;
 &lt;/div&gt;</pre>
 <p>
     I'll leave the implementation as an exercise to the reader, or perhaps a future post! ;)
