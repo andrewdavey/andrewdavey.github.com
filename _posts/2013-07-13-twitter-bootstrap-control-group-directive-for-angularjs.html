@@ -1,0 +1,209 @@
+---
+title: Twitter Bootstrap control-group directive for AngularJS
+layout: post
+---
+<p>
+    Twitter Bootstrap makes it easy to create great looking forms.
+    However, you may find yourself repeating the same <code>control-group</code> boilerplate markup.
+</p>
+
+<pre>&lt;div class="control-group"&gt;
+&lt;label class="control-label" for="example"&gt;Example&lt;/label&gt;
+&lt;div class="controls"&gt;
+    &lt;input type="text" id="example" /&gt;
+&lt;/div&gt;
+&lt;/div&gt;</pre>
+
+<p>
+    With AngularJS, we can refactor this UI pattern into a directive, 
+    and use it like this:
+</p>
+
+<pre>&lt;div control-group label="Example"&gt;
+&lt;input type="text" id="example" /&gt;
+&lt;/div&gt;</pre>
+
+<p>
+    The directive generates the boilerplate <code>div</code>s and <code>label</code> elements.
+    It then <em>transcludes</em> the <code>input</code> element you provided inside the generated elements.
+</p>
+
+<p>
+    Here's the basic <code>control-group</code> directive:
+</p>
+
+<pre>var app = angular.module("app", []);
+
+app.directive("controlGroup", function() {
+return {
+    template: 
+    '&lt;div class="control-group"&gt;\
+        &lt;label class="control-label" for="{{for}}"&gt;{{label}}&lt;/label&gt;\
+        &lt;div class="controls" ng-transclude&gt;&lt;/div&gt;\
+    &lt;/div&gt;',
+
+    replace: true,
+    transclude: true,
+
+    scope: {
+        label: "@" // Gets the string contents of the `label` attribute.
+    },
+
+    link: function (scope, element) {
+        // The &lt;label&gt; should have a `for` attribute that links it to the input.
+        // Get the `id` attribute from the input element
+        // and add it to the scope so our template can access it.
+        var id = element.find(":input").attr("id");
+        scope.for = id;
+    }
+};
+});</pre>
+
+<p>
+    The directive specifies <code>transclude: true</code>.
+    This means it can use the <code>ng-transclude</code> directive within its template to insert the child elements
+    of the source markup into the <code>&lt;div class="controls"&gt;</code> element.
+</p>
+
+<h2>Validation styling</h2>
+<p>
+    Bootstrap provides classes to indicate invalid inputs.
+    Adding the <code>error</code> class to the <code>control-group</code> element will make the 
+    label, input and other help text red to alert the user to the problem. 
+</p>
+<p>
+    Since we are using AngularJS, let's leverage the existing <code>ng-model</code> and <code>form</code> validation behaviors.
+    Here's a simple form with an input data-bound to a scope property.
+    The input also has the <code>required</code> attribute to trigger some basic AngularJS validation.
+</p>
+
+<pre>&lt;form name="form" class="form-horizontal" ng-controller="ExampleController"&gt;
+&lt;div control-group label="Example"&gt;
+    &lt;input type="text" ng-model="data.example" id="example" name="example" required /&gt;
+&lt;/div&gt;
+&lt;/form&gt;></pre>
+
+<p>
+    Assume the <code>ExampleController</code> is simply initialising the scope.
+</p>
+
+<pre>app.controller("ExampleController", ["$scope", function($scope) {
+$scope.data = {
+    example: ""
+};
+}]);</pre>
+
+<p>
+    To toggle the <code>error</code> class whenever the input is invalid, 
+    we can use <code>ng-class</code> directive within the control group template.
+</p>
+
+<pre>&hellip;
+template: 
+'&lt;div class="control-group" <strong>ng-class="{ error: isError }"</strong>&gt;\
+    &lt;label class="control-label" for="{{for}}"&gt;{{label}}&lt;/label&gt;\
+    &lt;div class="controls" ng-transclude&gt;&lt;/div&gt;\
+&lt;/div&gt;',
+&hellip;</pre>
+
+<p>
+    The directive's <code>link</code> function will need to managed this new <code>isError</code> property.
+    To do this it's need to access the input's validation state, which is kept by the form.
+    Adding the following <code>require</code> property to the directive defintion will give us access to the <code>NgFormController</code> in the <code>link</code> function.
+</p>
+
+<pre>&hellip;
+replace: true,
+transclude: true,
+<strong>require: "^form",</strong> // Tells Angular the control-group must be within a form
+&hellip;
+link: function(scope, element, attrs, <strong>formController</strong>) {
+&hellip;</pre>
+
+<p>
+    The validation status of an input is stored in the scope like this: <code>scope.{form-name}.{input-name}.$invalid</code>.
+    Note that the <code>form</code> and <code>input</code> elements must have <code>name</code> attributes for this to work.
+</p>
+
+<p>
+    Our directive definition has <code>scope: { label: "@" }</code>, which means it will create an isolated scope.
+    So the form validation information is actually in the parent scope i.e. <code>scope.$parent&hellip;</code> 
+</p>
+
+<p>
+    Here's the updated <code>link</code> function:
+</p>
+
+<pre>&hellip;    
+link: function(scope, element, attrs, formController) {
+    // The &lt;label&gt; should have a `for` attribute that links it to the input.
+    // Get the `id` attribute from the input element
+    // and add it to the scope so our template can access it.
+    var id = element.find(":input").attr("id");
+    scope.for = id;
+
+    // Get the `name` attribute of the input
+    var inputName = element.find(":input").attr("name");
+    // Build the scope expression that contains the validation status.
+    // e.g. "form.example.$invalid"
+    var errorExpression = [formController.$name, inputName, "$invalid"].join(".");
+    // Watch the parent scope, because current scope is isolated.
+    scope.$parent.$watch(errorExpression, function(isError) {
+        scope.isError = isError;
+    });
+}
+&hellip;</pre>
+
+<h2>Other improvements</h2>
+<p>
+    If you don't use the <code>input</code>'s <code>id</code> attribute anywhere else in your application, 
+    then it only exists to link it to the <code>label</code>.
+    You could remove the attribute from your mark-up and make the directive generate a unique ID instead
+    and set it on the <code>input</code> element.
+</p>
+<p>
+    Auto-generated unique IDs are very useful when your UI widgets may be inserted into pages where you can't 
+    guarantee uniqueness of manually defined IDs.
+</p>
+<p>
+    Another useful directive I use is to show validation error messages.
+    Here's an example of it in use:
+</p>
+<pre>&lt;div control-group label="Example"&gt;
+&lt;input type="text" ng-model="data.example" name="example" required/&gt;
+&lt;span validation-error-for="required"&gt;This input is required&lt;/span&gt;
+&lt;/div&gt;</pre>
+<p>
+    It expands into the following mark-up:
+</p>
+<pre>&lt;div control-group label="Example"&gt;
+&lt;input type="text" ng-model="data.example" name="example" required/&gt;
+&lt;span class="help-inline" ng-show="form.example.$error.required"&gt;This input is required&lt;/span&gt;
+&lt;/div&gt;</pre>
+<p>
+    I'll leave the implementation as an exercise to the reader, or perhaps a future post! ;)
+</p>
+
+<h2>Demo</h2>
+<iframe width="100%" height="300" src="http://jsfiddle.net/andrewdavey/aJH84/embedded/" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+<div style="border: 1px solid #8D4E0A; padding: 20px; margin-bottom: 30px; background: white">
+  <form method="post" action="http://insighttracking.us2.list-manage.com/subscribe/post?u=bfb32cd1f0342aa0f65c992ca&amp;id=f411a37d62" target="_blank">
+    <p style="font-weight: bold">Subscribe to Andrew Davey's Web Development mailing list.</p>
+    <fieldset>
+      <div class="field">
+        <label for="email-address">Email address</label><input id="email-address" type="email" name="EMAIL" required />
+      </div>
+      <div class="field">
+        <label for="github-username">GitHub username</label><input id="github-username" type="text" name="GITHUBUSER" required/>
+      </div>
+      <div class="form-actions">
+        <button type="submit">Subscribe</button>
+      </div>
+    </fieldset>
+    <p style="font-size: .8em; margin-top: 10px">
+    No spam, just occasional web development tips, posts and sample code.
+    Unsubscribe at any time.
+    </p>
+  </form>
+</div>
