@@ -38,7 +38,7 @@ app.directive("controlGroup", function() {
     return {
         template: 
         '&lt;div class="control-group"&gt;\
-            &lt;label class="control-label" for="&#123;for&#125;"&gt;&#123;label&#125;&lt;/label&gt;\
+            &lt;label class="control-label" for="&#123;&#123;for&#125;&#125;"&gt;&#123;&#123;label&#125;&#125;&lt;/label&gt;\
             &lt;div class="controls" ng-transclude&gt;&lt;/div&gt;\
         &lt;/div&gt;',
 
@@ -101,7 +101,7 @@ app.directive("controlGroup", function() {
 <pre>&hellip;
 template: 
 '&lt;div class="control-group" <strong>ng-class="{ error: isError }"</strong>&gt;\
-    &lt;label class="control-label" for="&#123;for&#125;"&gt;&#123;label&#125;&lt;/label&gt;\
+    &lt;label class="control-label" for="&#123;&#123;for&#125;&#125;"&gt;&#123;&#123;label&#125;&#125;&lt;/label&gt;\
     &lt;div class="controls" ng-transclude&gt;&lt;/div&gt;\
 &lt;/div&gt;',
 &hellip;</pre>
