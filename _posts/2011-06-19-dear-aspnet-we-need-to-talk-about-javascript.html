@@ -1,4 +1,4 @@
----
+Ôªø---
 layout: post
 title: Dear ASP.NET, we need to talk about JavaScript
 ---
@@ -9,15 +9,15 @@ However, the more I develop rich web applications, the more I see gaps in your t
 Your server-side development story is excellent, but client-side (in browser) is weak.</p>
 <p>Having now built a few JavaScript heavy, rich interactive web applications with .NET, 
 I can tell you that you are lacking in some key areas. 
-Therefore, Iím (not so humbly) going to make some observations and feature requests.</p>
+Therefore, I‚Äôm (not so humbly) going to make some observations and feature requests.</p>
 </p>
 
 <h2>JavaScript</h2>
 <p>Visual Studio needs a JavaScript project type. 
-If Iím building a complex jQuery plugin, Node.JS application or anything else involving more
+If I‚Äôm building a complex jQuery plugin, Node.JS application or anything else involving more
 than one JavaScript file, then rolling my own build system is tedious.</p>
 <p>You already have an excellent Visual Studio language service for JavaScript. 
-The intellisense tricks youíre pulling off are fantastic. Capitalise on this by
+The intellisense tricks you‚Äôre pulling off are fantastic. Capitalise on this by
 adding a project type.</p>
 <p><strong>I want File &gt; New JavaScript Project.</strong></p>
 <p>The result of Release building a JavaScript project should be a concatenated, 
@@ -28,15 +28,15 @@ so reuse this.</p>
 <p>Allow the Web Application Project types to link to a JavaScript project to get the scripts. 
 This could be similar to how Silverlight projects link to Web Application projects.</p>
 <p>Also, build in support for <a href="http://www.jslint.com/">JSLint</a> and 
-display red squiggles in my code when Iím writing poor JavaScript.</p>
+display red squiggles in my code when I‚Äôm writing poor JavaScript.</p>
 
 <h2>CoffeeScript</h2>
 <p>Get on the <a href="http://coffeescript.org/">CoffeeScript</a> bandwagon as soon as possible! 
 Rails already has. CoffeeScript makes writing JavaScript faster and easier to maintain.
-Itís a fantastic language.</p>
+It‚Äôs a fantastic language.</p>
 <p>I need Visual Studio support for CoffeeScript i.e. syntax highlighting, 
 intellisense and a project type. 
-Iíll also need to mix JavaScript and CoffeeScript in the same project because of existing
+I‚Äôll also need to mix JavaScript and CoffeeScript in the same project because of existing
 libraries like jQuery.</p>
 <p>The existing CoffeeScript compiler runs in JavaScript. 
 So either, get your own DLR-based, JavaScript engine or (even better) 
@@ -46,8 +46,8 @@ Alternatively, write a new compiler in C#.</p>
 
 <h2>HTML Templates</h2>
 <p>Client-side web applications require HTML templating. jQuery.tmpl is very 
-nice and works well with Steve Sandersonís <a href="http://knockoutjs.com/">KnockoutJS</a>. 
-However, the current approach of ìstuff a bunch of template containing script tags into the pageî 
+nice and works well with Steve Sanderson‚Äôs <a href="http://knockoutjs.com/">KnockoutJS</a>. 
+However, the current approach of ‚Äústuff a bunch of template containing script tags into the page‚Äù 
 does not scale well with projects having hundreds of templates.</p>
 <p>Making the browser parse and code-generate the templates into JavaScript 
 on every page feels like a huge waste of time. This needs to be done server-side
@@ -59,7 +59,7 @@ and client-side templates. The same templates could even be reusable on both sid
 <p>You just need to add JavaScript and (please, please, please) CoffeeScript
 support to the Razor parser. CoffeeScript will be an especially nice language 
 to write Razor templates in. For example, it has a much cleaner, C#-style, 
-ìfor eachî than raw JavaScript.</p>
+‚Äúfor each‚Äù than raw JavaScript.</p>
 <p>Implementing this requires a managed JavaScript engine. Again, something 
 like IronJS/Jurassic can be used.</p>
 <p>Server-side, the Razor views run on the DLR and work just like any other MVC view.</p>
@@ -67,8 +67,8 @@ like IronJS/Jurassic can be used.</p>
 
 <h2>Client-side Asset Management</h2>
 <p>Scripts, style sheets, images and HTML templates are the client-side assets 
-of a web application. The current ASP.NET story for these is ìstuff them into
-folders and deployî. This is not good enough!</p>
+of a web application. The current ASP.NET story for these is ‚Äústuff them into
+folders and deploy‚Äù. This is not good enough!</p>
 <p>Combining, minification, versioning, compression and caching, all matter for 
 production deployment. We need a solution that handles all that, whilst still 
 maintaining an excellent debug-time experience. Stepping into a 10,000 line, 
