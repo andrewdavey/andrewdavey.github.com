@@ -1,10 +1,10 @@
----
+ï»¿---
 layout: post
 title: Efficient Encapsulation of JavaScript Objects
 ---
 <p>Encapsulation is one of the most important principles of object oriented programming. Ideally, an object exposes a limited public interface and keeps its data and implementation details private.
 </p>
-<p>JavaScript does not provide a built-in way to manage the visibility of an object’s members. However its flexibility does allow us to recreate encapsulation. A common approach is to use a function that contains the private data and functions, and then return a limited set of public functions that can interact with the private data.
+<p>JavaScript does not provide a built-in way to manage the visibility of an objectâ€™s members. However its flexibility does allow us to recreate encapsulation. A common approach is to use a function that contains the private data and functions, and then return a limited set of public functions that can interact with the private data.
 </p>
 
 <code><pre class="brush: javascript">var Customer = function(id) {
@@ -31,7 +31,7 @@ title: Efficient Encapsulation of JavaScript Objects
     };
 };</pre></code>
 
-<p>This approach is valid, but not necessarily that efficient when creating lots of objects. Every time an object is created, all its functions and created as well. This takes time, and perhaps more importantly, memory. If you’re script is running on a mobile device then resources can be limited. Also, server-side JavaScript running in NodeJS could be creating many thousands of objects.
+<p>This approach is valid, but not necessarily that efficient when creating lots of objects. Every time an object is created, all its functions and created as well. This takes time, and perhaps more importantly, memory. If youâ€™re script is running on a mobile device then resources can be limited. Also, server-side JavaScript running in NodeJS could be creating many thousands of objects.
 </p>
 <p>JavaScript provides the prototype model of inheritance to solve this problem. A single prototype object can contain the functions. Then any objects that have that prototype can share them without any extra overhead.
 </p>
@@ -63,9 +63,9 @@ Customer.prototype.isSpecial = function() {
 While this code is more efficient, we have lost the ability to encapsulate any data and private functions.
 Anyone creating a <code>Customer</code> object can directly access the <code>totalSpend</code> property.
 </p>
-<p>A possible workaround is to rely on a convention of, for example, prefixing all non-public members with an underscore. Personally, I dislike this. It adds syntactic noise to the code and doesn’t discourage wayward developers from using objects in ways they shouldn’t!
+<p>A possible workaround is to rely on a convention of, for example, prefixing all non-public members with an underscore. Personally, I dislike this. It adds syntactic noise to the code and doesnâ€™t discourage wayward developers from using objects in ways they shouldnâ€™t!
 </p>
-<p>Therefore I created an alternative solution. It combines the efficiency of prototypes, with the principles of encapsulation. Here’s a quick example of defining a class:
+<p>Therefore I created an alternative solution. It combines the efficiency of prototypes, with the principles of encapsulation. Hereâ€™s a quick example of defining a class:
 </p>
 
 <code><pre class="brush: javascript">var Customer = defineClass({
@@ -95,9 +95,9 @@ Anyone creating a <code>Customer</code> object can directly access the <code>tot
     }
 });</pre></code>
 
-<p>The defineClass function accepts an object literal which contains the constructor, the public functions and private functions. Within functions, the "this" keyword works as normal, allowing storage of data in the object. All the object’s functions, public and private, can call each other.
+<p>The defineClass function accepts an object literal which contains the constructor, the public functions and private functions. Within functions, the "this" keyword works as normal, allowing storage of data in the object. All the objectâ€™s functions, public and private, can call each other.
 </p>
-<p>Let’s examine the use of an instance of the object.</p>
+<p>Letâ€™s examine the use of an instance of the object.</p>
 
 <code><pre class="brush: javascript">var customer = new Customer(123);
 console.log( customer.toString() ); // &gt; "Customer #123"
@@ -114,11 +114,11 @@ customer.totalSpend = 1000;
 console.log( customer.getReward() ); // &gt; "Nothing Today"
 console.log( typeof customer.isSpecial ); // &gt; "undefined"</pre></code>
 
-<p>Any attempt to use the private data or functions fails. The actual object we’re using doesn't have those private members.
+<p>Any attempt to use the private data or functions fails. The actual object weâ€™re using doesn't have those private members.
 
 <h2>Annotated source for defineClass</h2>
 
-<p>The source code for defineClass is annotated with comments to explain the trickier details. It’s less than 100 lines and is probably easier to read, than explain it again here. 
+<p>The source code for defineClass is annotated with comments to explain the trickier details. Itâ€™s less than 100 lines and is probably easier to read, than explain it again here. 
 </p>
 
 <code><pre class="brush: javascript">var defineClass = (function() {
@@ -218,7 +218,7 @@ console.log( typeof customer.isSpecial ); // &gt; "undefined"</pre></code>
 </p>
 <p>This does provide a way to circumvent the proxy, by directly using the real object property. However, choosing a suitable name for the property will clearly highlight any calling code that is doing something questionable.
 </p>
-<p>In addition, it is sometimes necessary to violate encapsulation. A common case is for serialization, which requires access to the private data of an object. It’s therefore useful to have an "escape valve".
+<p>In addition, it is sometimes necessary to violate encapsulation. A common case is for serialization, which requires access to the private data of an object. Itâ€™s therefore useful to have an "escape valve".
 </p>
 
 <h2>Extensions</h2>
