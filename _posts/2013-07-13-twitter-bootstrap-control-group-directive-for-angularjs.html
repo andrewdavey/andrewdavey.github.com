@@ -32,13 +32,14 @@ layout: post
     Here's the basic <code>control-group</code> directive:
 </p>
 
+{% raw %}
 <pre>var app = angular.module("app", []);
 
 app.directive("controlGroup", function() {
     return {
         template: 
         '&lt;div class="control-group"&gt;\
-            &lt;label class="control-label" for="&#123;&#123;for&#125;&#125;"&gt;&#123;&#123;label&#125;&#125;&lt;/label&gt;\
+            &lt;label class="control-label" for="{{for}}"&gt;{{label}}&lt;/label&gt;\
             &lt;div class="controls" ng-transclude&gt;&lt;/div&gt;\
         &lt;/div&gt;',
 
@@ -58,6 +59,7 @@ app.directive("controlGroup", function() {
         }
     };
 });</pre>
+{% endraw %}
 
 <p>
     The directive specifies <code>transclude: true</code>.
@@ -98,13 +100,15 @@ app.directive("controlGroup", function() {
     we can use <code>ng-class</code> directive within the control group template.
 </p>
 
+{% raw %}
 <pre>&hellip;
 template: 
 '&lt;div class="control-group" <strong>ng-class="{ error: isError }"</strong>&gt;\
-    &lt;label class="control-label" for="&#123;&#123;for&#125;&#125;"&gt;&#123;&#123;label&#125;&#125;&lt;/label&gt;\
+    &lt;label class="control-label" for="{{for}}"&gt;{{;&#123;label}}&lt;/label&gt;\
     &lt;div class="controls" ng-transclude&gt;&lt;/div&gt;\
 &lt;/div&gt;',
 &hellip;</pre>
+{% endraw %}
 
 <p>
     The directive's <code>link</code> function will need to managed this new <code>isError</code> property.
