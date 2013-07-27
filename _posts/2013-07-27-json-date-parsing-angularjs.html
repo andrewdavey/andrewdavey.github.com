@@ -17,7 +17,6 @@ function convertDateStringsToDates(input) {
         var value = input[key];
         var match;
         // Check for string properties which look like dates.
-        // TODO: Improve this regex to better match ISO 8601 date strings.
         if (typeof value === "string" &amp;&amp; (match = value.match(regexIso8601))) {
             var milliseconds = Date.parse(match[0])
             if (!isNaN(milliseconds)) {
@@ -30,7 +29,7 @@ function convertDateStringsToDates(input) {
     }
 }</code></pre>
 
-<p>Instead of using this manually function each time we make an AJAX call, we'd rather wire it into the default AJAX processing i.e. "set it and forget it". AngularJS makes this easy by using HTTP response interceptors.</p>
+<p>Instead of using this function manually each time we make an AJAX call, we'd rather wire it into the default AJAX processing i.e. "set it and forget it". AngularJS makes this easy by using HTTP response interceptors.</p>
 <p>First, let's assume we have a basic AngularJS application module:</p>
 <pre><code>var app = angular.module("app", []);</code></pre>
 
