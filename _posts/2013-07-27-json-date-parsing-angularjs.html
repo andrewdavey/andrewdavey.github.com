@@ -1,0 +1,66 @@
+---
+title: Automatic JSON date parsing with AngularJS
+layout: post
+---
+<p>JSON doesn't have a native date/time data-type. So you're most likely to see dates encoded as strings. A good choice of string format is <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a>. It's easy to parse and relatively unambiguous.</p>
+<p>However, when it comes to working with dates in JavaScript, it's far better to work with the built-in <code>Date</code> object, instead of strings. Client-side code will need to convert any date strings found in JSON responses into Date objects.</p>
+<p>Here's a function that recursively searches the properties of an object, replacing date/time strings with Date objects:</p>
+<pre><code>var regexIso8601 = /^(\d{4}|\+\d{6})(?:-(\d{2})(?:-(\d{2})(?:T(\d{2}):(\d{2}):(\d{2})\.(\d{1,})(Z|([\-+])(\d{2}):(\d{2}))?)?)?)?$/;
+
+function convertDateStringsToDates(input) {
+    // Ignore things that aren't objects.
+    if (typeof input !== "object") return input;
+
+    for (var key in input) {
+        if (!input.hasOwnProperty(key)) continue;
+
+        var value = input[key];
+        var match;
+        // Check for string properties which look like dates.
+        // TODO: Improve this regex to better match ISO 8601 date strings.
+        if (typeof value === "string" &amp;&amp; (match = value.match(regexIso8601))) {
+            var milliseconds = Date.parse(match[0])
+            if (!isNaN(milliseconds)) {
+                input[key] = new Date(milliseconds);
+            }
+        } else if (typeof value === "object") {
+            // Recurse into object
+            convertDateStringsToDates(value);
+        }
+    }
+}</code></pre>
+
+<p>Instead of using this manually function each time we make an AJAX call, we'd rather wire it into the default AJAX processing i.e. "set it and forget it". AngularJS makes this easy by using HTTP response interceptors.</p>
+<p>First, let's assume we have a basic AngularJS application module:</p>
+<pre><code>var app = angular.module("app", []);</code></pre>
+
+<p>We can configure the <code>$httpProvider.defaults</code> by adding our response transformer, so it'll be used everytime an HTTP request is made using the <code>$http</code> service.
+    Note that this is also how Angular is able to parse JSON response strings into objects for us.</p>
+<pre><code>app.config(["$httpProvider", function ($httpProvider) {
+     $httpProvider.defaults.transformResponse.push(function(responseData){
+        convertDateStringsToDates(responseData);
+        return responseData;
+    });
+}]);</code></pre>
+
+<p>
+    We can now make HTTP requests using the <code>$http</code> service and 
+    know that any date-strings will have already been converted into Date objects.
+</p>
+
+<pre><code>app.controller("MyController", ["$scope", "$http", function($scope, $http) {
+    $scope.go = function() {
+        $http.get("/foo").then(function(response) {
+            // date-string properties of `response.data` will now be Date objects.
+        };
+    };
+}]);</code></pre>
+
+<h2>Working Demo</h2>
+<iframe width="100%" height="300" src="http://jsfiddle.net/kQZw8/6/embedded/result,js,html" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
+<p>
+    Check out the AngularJS 
+    <a href="http://docs.angularjs.org/api/ng.$http#transformingrequestsandresponses">$http documentation</a> 
+    for more details about transforming HTTP requests and responses.
+</p>
