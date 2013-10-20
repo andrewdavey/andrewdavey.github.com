@@ -1,0 +1,33 @@
+---
+title: Creating AngularJS controller classes with TypeScript
+layout: post
+---
+<p>
+    I recently learned of AngularJS's "controller as" syntax.
+    It allows you to define an indentifier for the controller instance that is controlling your view.
+    This means you can then access properties of that controller.
+</p>
+
+<pre>&lt;div ng-controller="<strong>ExampleController as example</strong>"&gt;
+    &lt;input type="text" ng-model="example.message" /&gt;
+&lt;/div&gt;</pre>
+
+<p>
+    This syntax is an alternative to the controller defining data directly on the scope.
+    It is particularly useful when working with TypeScript or CoffeeScript, 
+    which have a nice <code>class</code> syntax.
+    We can define a controller as a class, with properties for the data to display and 
+    methods that handle UI events.
+</p>
+
+<p>
+    Here's an example AngularJS application, written in TypeScript:
+</p>
+
+<script src="https://gist.github.com/andrewdavey/7072745.js"></script>
+
+<p>
+    And here's the HTML for that application:
+</p>
+
+<script src="https://gist.github.com/andrewdavey/7072764.js"></script>
