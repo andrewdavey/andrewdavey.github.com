@@ -1,0 +1,136 @@
+---
+title: Saving my sanity with browser-automation testing?!
+layout: post
+---
+
+<p>
+In the rough-and-tumble world of creating a SaaS start-up, I find it all too easy to fall off the automated testing wagon.
+It starts with a few quick-fixes, hacked in to meet a new customer need and before I know it, all my tests are nasty red, unmaintainable mess!
+Then comes the dilemma: when do I spend precious feature development time paying down that technical debt?
+</p>
+
+<p>
+I need to be pragmatic about how and what I test in my application.
+What do my customers care about?
+They need to be able to log in, enter data and view various reports.
+So a basic set of high-level, browser-automation tests that verify common customer scenarios should be a great start.
+They'll give me the confidence to push code live, without worrying if it broke something essential!
+</p>
+
+<p>
+I'm sure some kind of 80/20 rule applies.
+80% of the application's usage can be covered by 20% of the tests.
+So for now, I'll focus on getting that 20% in place.
+</p>
+
+<p>
+I'm on a journey to restore sanity to my application's tests.
+I'll be blogging here more about what I learn on the way.
+</p>
+
+<h2>The set-up</h2>
+
+<p>
+My web application uses AngularJS. 
+The future of browser-automation testing for this lies with 
+<a href="https://code.google.com/p/selenium/wiki/WebDriverJs">Selenium's WebDriverJS</a>
+and the <a href="https://github.com/angular/protractor">Protractor</a> wrapper library.
+</p>
+
+<p>
+After a few false starts, and hours spelunking through half-finished documentation and library source code,
+I've managed to get a working environment for browser-automation tests.
+</p>
+
+<p>
+Currently, I'm not using Jasmine, Mocha, or any other test runner.
+I'm yet to find one that makes WebDriverJS's promise-based approach to async testing feel natural.
+I don't need fancy BDD DSLs and pretty output reports.
+For now, it's enough to simply run <code>node my-scenario.js</code> and see no exceptions :)
+</p>
+
+<p>
+Here's one of the first scenarios I got working.
+It tests the login page of the application.
+</p>
+
+<pre>var browserTest = require("../browserTest");
+var LoginPage = require("../pages/LoginPage");
+var db = require("../utils/db");
+
+// browserTest is a helper that manages creating a WebDriverJS instance and wrapping it with Protractor.
+browserTest(function (browser) {
+    var loginPage;
+    // Set up some basic data in my test database
+    db.createSchool("1234567");
+    db.createSchoolUser("user@school.com", "1234567");
+
+    // Login with invalid credentials
+    loadLoginPage();
+    loginPage.setEmailAddress("no@example.com");
+    loginPage.setPassword("wrong");
+    loginPage.clickLogin();
+    loginPage.errorMessage().shouldBe("The email address or password you entered doesn't match our records. Please try again.");
+
+    // Login with valid credentials
+    loadLoginPage();
+    loginPage.setEmailAddress("user@school.com");
+    loginPage.setPassword("password");
+    loginPage.clickLogin();
+    // Should be redirected to school home page
+    browser.getCurrentUrl().shouldBe("http://localhost/school/1234567");
+
+    function loadLoginPage() {
+        browser.get("http://localhost");
+        loginPage = new LoginPage(browser);
+    }
+});</pre>
+
+<p>
+UI tests have a tendency to be very brittle.
+The slightest change to a page can result in every test failing!
+</p>
+
+<p>
+To keep my test code clean and maintainable I'm making use of the "Page Object" pattern.
+This abstracts away the messy business of interacting with the web page,
+leaving the test code to be a clear expression of a user's intent.
+</p>
+
+<p>
+Here's the <code>LoginPage</code> module.
+</p>
+
+<pre>var protractor = require("protractor");
+
+var LoginPage = function (browser) {
+    this.browser = browser;
+};
+
+LoginPage.prototype = {
+
+    setEmailAddress: function (emailAddress) {
+        this.browser.findElement(protractor.By.input("emailAddress")).sendKeys(emailAddress);
+    },
+
+    setPassword: function (password) {
+        this.browser.findElement(protractor.By.input("password")).sendKeys(password);
+    },
+
+    clickLogin: function () {
+        this.browser.findElement(protractor.By.tagName("button")).click();
+        this.browser.waitForAngular();
+    },
+
+    errorMessage: function () {
+        return this.browser.findElement(protractor.By.css(".alert")).getText();
+    }
+};
+
+module.exports = LoginPage;</pre>
+
+<p>
+I'd love to hear about your experiences with browser-automation testing.
+What handy tools/libraries have you tried?
+What's tripped you up?
+</p>
