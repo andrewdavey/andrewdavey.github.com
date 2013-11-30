@@ -54,7 +54,7 @@ Here's one of the first scenarios I got working.
 It tests the login page of the application.
 </p>
 
-<pre>var browserTest = require("../browserTest");
+<pre class="brush: javascript">var browserTest = require("../browserTest");
 var LoginPage = require("../pages/LoginPage");
 var db = require("../utils/db");
 
@@ -101,7 +101,7 @@ leaving the test code to be a clear expression of a user's intent.
 Here's the <code>LoginPage</code> module.
 </p>
 
-<pre>var protractor = require("protractor");
+<pre class="brush: javascript">var protractor = require("protractor");
 
 var LoginPage = function (browser) {
     this.browser = browser;
