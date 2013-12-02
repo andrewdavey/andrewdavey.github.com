@@ -1,0 +1,121 @@
+---
+title: Automating Chrome on Windows with JavaScript using Selenium's WebDriverJS
+layout: post
+---
+
+<p>
+To test my web application, I'm using web browser automation.
+Getting this set up on Windows took a bit of trial and error, 
+so I've documented the process for future reference.
+</p>
+
+<p>
+Here's the list of tools you'll need to get up and running:
+</p>
+<ul>
+  <li>Java</li>
+  <li>Selenium</li>
+  <li>Chromedriver</li>
+  <li>NodeJS</li>
+  <li>selenium-webdriver via npm</li>
+</ul>
+
+<h2>Installing the tools</h2>
+
+<p>
+Selenium runs on Java, so if you don't it installed yet, download it from 
+<a target="_blank" href="http://www.java.com/en/download/manual.jsp">http://www.java.com/en/download/manual.jsp</a>.
+</p>
+
+<p>
+Check that Java is installed, by running the following from a command prompt:
+</p>
+<pre>c:\&gt;java -version</pre>
+
+<p>Here's what I get:</p>
+
+<pre>C:\Users\andrew&gt;java -version
+java version "1.7.0_45"
+Java(TM) SE Runtime Environment (build 1.7.0_45-b18)
+Java HotSpot(TM) 64-Bit Server VM (build 24.45-b08, mixed mode)
+</pre>
+
+<p>
+Next, you need to get Selenium.
+It's enough to simply download the "selenium-server-standalone" jar file from
+<a target="_blank" href="https://code.google.com/p/selenium/downloads/list">https://code.google.com/p/selenium/downloads/list</a>.
+At the time of writing, the latest version was 
+<a target="_blank" href="https://selenium.googlecode.com/files/selenium-server-standalone-2.37.0.jar">selenium-server-standalone-2.37.0.jar</a>.
+</p>
+
+<p>
+To allow Selenium to control Chrome, you'll need the "chromedriver", available from here:
+<a target="_blank" href="http://chromedriver.storage.googleapis.com/index.html">http://chromedriver.storage.googleapis.com/index.html</a>.
+At the time of writing, the latest version was <a target="_blank" href="http://chromedriver.storage.googleapis.com/2.7/chromedriver_win32.zip">2.7</a>.
+</p>
+
+<p>
+Copy the selenium-server-standalone jar file and chromedriver.exe into your project's directory.
+Open a new command prompt, change to your project directory and then start Selenium with the following command:
+</p>
+
+<pre>c:\myproject&gt;java -jar selenium-server-standalone-2.35.0.jar -Dwebdriver.chrome.driver=chromedriver.exe</pre>
+
+<p>
+The server can be stopped by pressing Ctrl+C.
+</p>
+
+<p>
+To run JavaScript-based tests, you'll need to have NodeJS installed.
+Download the installer from <a target="_blank" href="http://nodejs.org/">http://nodejs.org/</a>.
+</p>
+
+<p>
+Once NodeJS is installed, you can use the Node Package Manager (npm) to install the selenium-webdriver library:
+</p>
+
+<pre>c:\myproject&gt;npm install selenium-webdriver</pre>
+
+<h2>A basic browser automation script</h2>
+
+<p>
+You can now create JavaScript files that will automate Chrome.
+Here's a simple script, <code>test.js</code>.
+</p>
+
+<pre class="brush: javascript">var webdriver = require("selenium-webdriver");
+
+function createDriver() {
+    var driver = new webdriver.Builder()
+        .usingServer('http://localhost:4444/wd/hub')
+        .withCapabilities(webdriver.Capabilities.chrome())
+        .build();
+    driver.manage().timeouts().setScriptTimeout(10000);
+    return driver;
+}
+
+var driver = createDriver();
+driver.get("http://www.google.com");
+
+driver.getTitle().then(function (title) {
+    console.log(title);
+});
+
+driver.quit();</pre>
+
+<p>Run this at the command prompt, using node:</p>
+
+<pre>c:\myproject&gt;node test.js</pre>
+
+<h2>Learning more</h2>
+<p>
+The WebDriverJS library is documented here:
+<a href="https://code.google.com/p/selenium/wiki/WebDriverJs" target="_blank">https://code.google.com/p/selenium/wiki/WebDriverJs</a>.
+</p>
+
+<p>
+The library makes great use of "Promises" to handle the asynchronous nature of browser automation.
+So it's essential to read the 
+<a href="https://code.google.com/p/selenium/wiki/WebDriverJs#Understanding_the_API" target="_blank">Understanding the API</a>
+section.
+</p>
