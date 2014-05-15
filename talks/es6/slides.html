@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>JavaScript: The Great Parts</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      body {
+        font-family: Helvetica Neue;
+        font-size: 20px;
+      }
+      .remark-container {
+        background-color: black;
+      }
+      .remark-slide-scaler {
+        -moz-box-shadow: none;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+      }
+      .remark-slide-content {
+        background-color: rgb(252, 252, 252);
+      }
+      .remark-slide-content h1 {
+        font-size: 43px;
+      }
+      .remark-slide-content h2 {
+        font-size: 33px;
+      }
+      .remark-slide-content h3 {
+        font-size: 23px;
+      }
+      .hljs-default .hljs {
+        background-color: transparent;
+        padding: 0;
+      }
+      .remark-slide-number {
+        display: none;
+      }
+      pre {
+        font-size: 1.1em;
+        font-family: Monaco;
+      }
+      code {
+        font-family: Monaco;
+      }
+      .remark-code {
+        font-size: 22px;
+      }
+      .remark-code-line {
+        min-height: 25px;
+      }
+      .hljs-keyword {
+        color: rgb(50, 2, 172);
+      }
+      a {
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .attention {
+        color: green;
+        outline: solid 2px green;
+      }
+      .attention-bad {
+        color: red;
+        outline: solid 2px red;
+      }
+
+      .title {
+        //background-image: url(title.jpg);
+        background-size: cover !important; 
+        //color: white;
+      }
+      .title h3, .title h2 {
+        //color: #eee;
+      }
+
+      .books {
+        //background-image: url(books.jpg);
+        background-size: cover !important; 
+      }
+
+      .classes {
+        //background-image: url(classes.jpg);
+        background-size: cover !important; 
+      }
+
+      .arrow {
+        //background-image: url(arrow.jpg);
+        background-size: cover !important; 
+      }
+
+      .destructuring {
+        //background-image: url(destructuring.jpg);
+        background-size: cover !important; 
+      }
+
+      .template-strings {
+        //background-image: url(template-strings.jpg);
+        background-size: cover !important; 
+      }
+
+      .es5 {
+        background-color: rgb(255, 235, 226);
+      }
+      .es6 {
+        background-color: rgb(230, 255, 218);
+      }
+
+      .code-split {
+        background-image: linear-gradient(to bottom, rgb(255, 235, 226) 0%, rgb(255, 235, 226) 50%, rgb(230, 255, 218) 50%, rgb(230, 255, 218) 100%);
+      }
+      .code-split pre + pre {
+        position: absolute;
+        top: 50%;
+      }
+      .code-split-bottom {
+        position: absolute;
+        top: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source" style="display:none">
+
+class: middle, title
+
+# JavaScript: The Great Parts
+## Andrew Davey
+### @andrewdavey
+???
+
+Hello
+
+---
+
+class: center, middle, es6
+# ECMAScript 6
+
+???
+- What is ES6?
+- What will this talk cover
+- Clean code - maintainble, etc
+
+---
+
+class: classes
+
+# Classes
+
+---
+
+## What do you type in <em>Java</em> to define a class?
+
+--
+
+```c++
+class
+```
+
+--
+
+## C++?
+
+--
+
+```c++
+class
+```
+
+--
+
+## Visual Basic?
+
+--
+
+```vb
+Class
+```
+
+--
+
+## What about JavaScript?
+
+&hellip;
+
+---
+
+class: center, middle, es5
+<h1 style="font-family: monospace; font-size: 6em">function ?!</h1>
+
+---
+
+class: es5
+
+# 'Classes' in JavaScript today
+
+```javascript
+function Account(id) {
+  this.id = id;
+  this.balance = 0;
+}
+```
+
+---
+
+class: es5
+
+# 'Classes' in JavaScript today
+
+```javascript
+function Account(id) {
+  this.id = id;
+  this.balance = 0;
+}
+
+Account.prototype.deposit = function(amount) {
+  this.balance = this.balance + amount;
+};
+
+Account.prototype.withdraw = function(amount) {
+  this.balance = this.balance - amount;
+};
+
+var a = new Account("ABC");
+a.deposit(100);
+```
+
+
+---
+
+class: center, middle, es5
+
+# <span style="color: rgb(221, 27, 27)">HOW</span> vs <span style="color: green">WHAT</span>
+
+---
+
+class: center, middle, es5
+
+# Wait! It gets worse&hellip;
+
+---
+
+class: es5
+
+# Inheritance
+
+```javascript
+function LimitedCreditAccount(id, creditLimit) {
+*  Account.call(this, id);
+  this.creditLimit = creditLimit;
+}
+
+```
+
+---
+
+class: es5
+
+# Inheritance
+
+```javascript
+function LimitedCreditAccount(id, creditLimit) {
+  Account.call(this, id);
+  this.creditLimit = creditLimit;
+}
+
+*LimitedCreditAccount.prototype = 
+*  Object.create(Account.prototype);
+```
+
+---
+
+class: es5
+
+# Inheritance
+
+```javascript
+function LimitedCreditAccount(id, creditLimit) {
+  Account.call(this, id);
+  this.creditLimit = creditLimit;
+}
+
+LimitedCreditAccount.prototype =
+  Object.create(Account.prototype);
+
+*LimitedCreditAccount.prototype.withdraw = function(amount) {
+*  if (this.balance - amount &lt; this.creditLimit) {
+*    throw new Error("Insufficient credit.");
+*  }
+*
+*};
+```
+
+---
+
+class: es5
+
+# Inheritance
+
+```javascript
+function LimitedCreditAccount(id, creditLimit) {
+  Account.call(this, id);
+  this.creditLimit = creditLimit;
+}
+
+LimitedCreditAccount.prototype =
+  Object.create(Account.prototype);
+
+LimitedCreditAccount.prototype.withdraw = function(amount) {
+  if (this.balance - amount &lt; this.creditLimit) {
+    throw new Error("Insufficient credit.");
+  }
+*  Account.prototype.withdraw.call(this, amount);
+};
+```
+
+---
+
+class: center, middle, es6
+
+# What do you type in ES6
+# to define a class?
+
+---
+
+class: es6
+
+```javascript
+class Account {
+  
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+}
+```
+
+---
+
+class: es6
+
+```javascript
+class Account {
+
+  constructor(id) {
+    this.id = id;
+    this.balance = 0;
+  }
+
+
+
+
+
+
+
+
+
+
+}
+```
+
+
+---
+
+class: es6
+
+```javascript
+class Account {
+
+  constructor(id) {
+    this.id = id;
+    this.balance = 0;
+  }
+
+  deposit(amount) {
+    this.balance = this.balance + amount;
+  }
+
+  withdraw(amount) {
+    this.balance = this.balance - amount;
+  }
+
+}
+```
+
+???
+Generates exact same constructor function and prototype as in ES5
+
+---
+
+class: center, middle, es6
+
+# Inheritance in ES6
+
+---
+
+class: es6
+
+```javascript
+class LimitedCreditAccount extends Account {
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+```
+
+---
+
+class: es6
+
+```javascript
+class LimitedCreditAccount extends Account {
+
+  constructor(id, creditLimit) {
+*    super(id);
+    this.creditLimit = creditLimit;
+  }
+
+
+
+
+
+
+
+
+}
+```
+
+---
+
+class: es6
+
+```javascript
+class LimitedCreditAccount extends Account {
+
+  constructor(id, creditLimit) {
+    super(id);
+    this.creditLimit = creditLimit;
+  }
+
+  withdraw(amount) {
+    if (this.balance - amount &lt; this.creditLimit) {
+      throw new Error("Insufficient credit.");
+    }
+
+  }
+
+}
+```
+
+
+---
+
+class: es6
+
+```javascript
+class LimitedCreditAccount extends Account {
+
+  constructor(id, creditLimit) {
+    super(id);
+    this.creditLimit = creditLimit;
+  }
+
+  withdraw(amount) {
+    if (this.balance - amount &lt; this.creditLimit) {
+      throw new Error("Insufficient credit.");
+    }
+*   super.withdraw(amount);
+  }
+
+}
+```
+
+---
+
+class: right, arrow
+# Arrow Functions
+
+---
+
+class: es5
+
+```javascript
+var numbers = [1, 2, 3, 4, 5, 6];
+var results = numbers.filter(function(n) {
+                       return n % 2 === 0;
+                     })
+                     .map(function(n) {
+                       return n * 10;
+                     });
+
+console.log(results);
+// [20, 40, 60]
+```
+
+---
+
+class: code-split
+```javascript
+function(n) {
+  return n * 10;
+}
+```
+
+--
+```javascript
+n =&gt; n * 10
+```
+
+---
+
+class: es6
+
+```javascript
+var numbers = [1, 2, 3, 4, 5, 6];
+var results = numbers.filter(n =&gt; n % 2 === 0)
+                     .map(n =&gt; n * 10);
+              
+console.log(results);
+// [20, 40, 60]
+```
+
+---
+
+class: code-split
+
+```javascript
+function(x, y) {
+  return x + y;
+}
+```
+
+???
+Arrow function with multiple arguments
+
+--
+
+```javascript
+(x, y) =&gt; x + y
+```
+
+---
+
+class: code-split
+
+```javascript
+function() {
+  return "Hello, world!";
+}
+```
+
+???
+Arrow function with no arguments
+
+--
+
+```javascript
+() =&gt; "Hello, world!"
+```
+
+---
+
+class: code-split
+
+```javascript
+function(x) {
+  var y = example(x);
+  return y + 10;
+}
+```
+
+???
+Arrow function with statement body
+
+--
+
+```javascript
+x =&gt; {
+  var y = example(x);
+  return y + 10;
+}
+```
+
+---
+
+class: center, middle, es6
+
+# Arrow Functions
+<pre>
+<span style="font-size: 3em">this</span>
+</pre>
+---
+
+class: es5
+
+# Spot the bug
+
+```javascript
+var tweetService = {
+
+  tweets: [],
+
+  downloadTweets: function() {
+    $.get("/tweets", function(response) {
+      this.tweets.push(response.tweets);
+    });
+  }
+
+};
+
+```
+
+---
+
+class: es5
+
+# Spot the bug
+
+<pre><code class="javascript hljs remark-code"><span class="hljs-keyword">var</span> tweetService = {
+
+  tweets: [],
+
+  downloadTweets: <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{
+    $.get(<span class="hljs-string">"/tweets"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(response)</span> </span>{
+      <span class="hljs-keyword attention-bad">this</span>.tweets.push(response.tweets);
+    });
+  }
+
+};
+</code></pre>
+
+---
+
+class: es5
+
+```javascript
+var tweetService = {
+
+  tweets: [],
+
+  downloadTweets: function() {
+*    var that = this;
+    $.get("/tweets", function(response) {
+*      that.tweets.push(response.tweets);
+    });
+  }
+};
+```
+
+---
+
+class: es5
+
+```javascript
+var tweetService = {
+
+  tweets: [],
+
+  downloadTweets: function() {
+    $.get("/tweets", function(response) {
+      this.tweets.push(response.tweets);
+*    }.bind(this));
+  }
+};
+```
+
+---
+
+class: es6
+
+```javascript
+var tweetService = {
+
+  tweets: [],
+
+  downloadTweets: function() {
+    $.get(
+      "/tweets", 
+*      response =&gt; {
+*       this.tweets.push(response.tweets);
+*      }
+    );
+  }
+
+};
+```
+
+---
+
+class: center, destructuring
+
+<h1 style="position: relative; left: -1.5em">Destructuring Assignment</h1>
+
+---
+
+class: code-split
+
+```javascript
+var items = loadItems(); // [ 'a', 'b', ... ]
+var first = items[0];    // 'a'
+var second = items[1];   // 'b'
+console.log(first + second);
+```
+
+---
+
+class: code-split
+
+<pre class="code-split-top"><code>var <span class="attention-bad">items</span> = loadItems(); // [ 'a', 'b', ... ]
+var first = <span class="attention-bad">items</span>[0];    // 'a'
+var second = <span class="attention-bad">items</span>[1];   // 'b'
+console.log(first + second);</code></pre>
+
+---
+
+class: code-split
+
+```javascript
+var items = loadItems(); // [ 'a', 'b', ... ]
+var first = items[0];    // 'a'
+var second = items[1];   // 'b'
+console.log(first + second);
+```
+
+```javascript
+*var [ first, second ] = loadItems();
+console.log(first + second);
+```
+
+---
+
+class: code-split
+
+```javascript
+var items = loadItems(); // [ 'a', 'b', 'c' ]
+var first = items[0];    // 'a'
+var third = items[2];    // 'c'
+console.log(first + third);
+```
+
+???
+Skipping items
+
+--
+
+```javascript
+*var [ first, , third ] = loadItems();
+console.log(first + third);
+```
+
+---
+
+class: code-split
+
+```javascript
+var items = loadItems(); // [ 'a', 'b', 'c' ]
+var first = items[0];    // 'a'
+var rest = items.slice(1); // [ 'b', 'c' ]
+```
+
+???
+Match rest of array
+
+--
+
+```javascript
+*var [ first, ...rest ] = loadItems();
+```
+
+---
+
+class: es6
+# Watch out for null and undefined!
+
+```javascript
+var [ first, second ] = loadItems(); // null
+// Error!
+```
+
+--
+
+```javascript
+var [ first, second ] = loadItems() || [];
+```
+
+---
+
+class: es6
+# Undefined items
+
+```javascript
+var [ first, second ] = loadItems(); // [ 'a' ]
+
+first === 'a'
+second === undefined
+```
+
+---
+
+class: code-split
+
+```javascript
+var circle = createCircle();
+
+renderEllipse(
+  circle.x, circle.y,
+  circle.radius, circle.radius
+);
+```
+
+???
+Object destructuring
+
+---
+
+class: code-split
+
+<pre class="code-split-top"><code>var <span class="attention-bad">circle</span> = createCircle();
+
+renderEllipse(
+  <span class="attention-bad">circle</span>.x, <span class="attention-bad">circle</span>.y,
+  <span class="attention-bad">circle</span>.radius, <span class="attention-bad">circle</span>.radius
+);
+<code></pre>
+
+---
+
+class: code-split
+
+```javascript
+var circle = createCircle();
+
+renderEllipse(
+  circle.x, circle.y,
+  circle.radius, circle.radius
+);
+```
+
+```javascript
+var { x, y, radius } = createCircle();
+
+renderEllipse(x, y, radius, radius);
+```
+
+---
+
+class: code-split
+
+```javascript
+var circle = createCircle();
+
+renderEllipse(
+  circle.x, circle.y,
+  circle.radius, circle.radius,
+  hexCode(circle.color.r, circle.color.g, circle.color.b)
+);
+```
+
+???
+Object destructuring assignment
+
+--
+
+```javascript
+var { x, y, radius, color: { r, g, b } } = createCircle();
+
+renderEllipse(
+  x, y, radius, radius,
+  hexCode(r, g, b)
+);
+```
+
+---
+
+class: es6
+
+```javascript
+var {
+  x: xCoord,
+  y: yCoord,
+  radius: r
+} = createCircle();
+
+renderEllipse(xCoord, yCoord, r, r);
+```
+
+???
+Aliasing property names
+
+---
+
+class: code-split
+
+```javascript
+function log(prefix /*, line0, line1, ... */) {
+  var lines = Array.prototype.slice.call(arguments, 1);
+  lines.forEach(function(line) {
+    console.log(prefix + line);
+  });
+}
+
+log("INFO ", "test1", "test2", "test3");
+```
+
+???
+Destructuring function arguments
+
+--
+
+```javascript
+*function log(prefix, ...lines) {
+  lines.forEach(line =&gt; console.log(prefix + line));
+}
+
+log("INFO ", "test1", "test2", "test3")
+```
+
+---
+
+class: code-split
+
+```javascript
+var numbers = [ 17, 89, 34, 56 ];
+Math.max(numbers); // NaN !
+```
+
+???
+Spread operator
+
+---
+
+class: code-split
+
+```javascript
+var numbers = [ 17, 89, 34, 56 ];
+Math.max(numbers); // NaN !
+
+var numbers = [ 17, 89, 34, 56 ];
+*Math.max.apply(Math, numbers); // 89
+```
+
+---
+
+class: code-split
+
+```javascript
+var numbers = [ 17, 89, 34, 56 ];
+Math.max(numbers); // NaN !
+
+var numbers = [ 17, 89, 34, 56 ];
+Math.max.apply(Math, numbers); // 89
+```
+
+```javascript
+var numbers = [ 17, 89, 34, 56 ];
+*Math.max(...numbers); // 89
+```
+
+---
+
+class: code-split
+
+```javascript
+function ajax(options) {
+  // options.method
+  // options.url
+  // options.data etc
+}
+```
+
+???
+Destructuring function arguments
+
+--
+
+```javascript
+function ajax({ method, url, data }) {
+  // ...
+}
+```
+
+---
+
+class: template-strings
+# Template Strings
+
+---
+
+class: code-split
+
+```javascript
+var output = "From: " + from + "\n" + 
+  "To: " + to + "\n" +
+  "Subject: " + subject;
+```
+
+--
+
+```javascript
+var output = `From: ${from}
+To: ${to}
+Subject: ${subject}`;
+```
+
+---
+
+class: es6
+
+```javascript
+element.innerHTML = "&lt;p&gt;" + userProfile.name + "&lt;/p&gt;";
+```
+
+--
+
+```javascript
+element.innerHTML = `&lt;p&gt; ${userProfile.name} &lt;/p&gt;`;
+```
+
+--
+
+## What if?
+
+```
+userProfile.name = "&lt;script&gt;alert('Hacked');&lt;/script&gt;";
+```
+
+---
+
+class: es6
+
+```javascript
+function htmlEscape(str) {
+  return String(str)
+           .replace(/&amp;/g, '&amp;amp;')
+           .replace(/"/g, '&amp;&#8203;quot;')
+           .replace(/'/g, '&amp;#39;')
+           .replace(/&lt;/g, '&amp;lt;')
+           .replace(/&gt;/g, '&amp;gt;');
+}
+```
+
+--
+
+```javascript
+el.innerHTML = `&lt;p&gt; ${htmlEscape(userProfile.name)} &lt;/p&gt;`;
+```
+
+---
+
+class: es6
+
+```javascript
+el.innerHTML = HTML`&lt;p&gt; ${userProfile.name} &lt;/p&gt;`;
+```
+
+--
+
+```javascript
+function HTML(strings, ...values) {
+  var output = [];
+  strings.forEach((string, index) =&gt; {
+    output.push(string);
+    if (index &lt; values.length) {
+*      output.push(htmlEscape(values[index]));
+    }
+  });
+
+  return output.join("");
+}
+```
+
+---
+
+class: es6
+
+```javascript
+function HTML(strings, ...values) {
+  var output = [];
+  strings.forEach((string, index) =&gt; {
+    output.push(string);
+    if (index &lt; values.length) {
+      output.push(htmlEscape(values[index]));
+    }
+  });
+
+  return output.join("");
+}
+
+
+// el.innerHTML = HTML`&lt;p&gt; ${userProfile.name} &lt;/p&gt;`;
+
+el.innerHTML = HTML(
+  [ '&lt;p&gt; ', ' &lt;/p&gt;' ],
+  '&lt;script&gt;alert("hack")&lt;/script&gt;'
+);
+```  
+
+---
+
+class: center, middle, es6
+# Using ES6 Today
+
+---
+
+class: center, es6
+
+# Traceur
+
+<img src="tc.png" style="height: 180px"/>
+
+[https://github.com/google/traceur-compiler](https://github.com/google/traceur-compiler)
+
+--
+
+## REPL
+
+http://google.github.io/traceur-compiler/demo/repl.html
+
+---
+
+class: es6
+
+# Traceur
+
+```bash
+$ npm install -g traceur
+```
+
+--
+
+```bash
+$ ./traceur --script src/app.js --out out/app.js 
+```
+
+--
+
+- https://github.com/google/traceur-compiler/wiki/CompilingOffline
+
+- Note: Need to include traceur-runtime.js
+
+---
+
+class: es6
+
+# Traceur
+
+## Experimental features
+
+```bash
+$ ./traceur --script src/app.js --out out/app.js \
+            --experimental
+```
+
+--
+
+## Source maps
+
+```bash
+$ ./traceur --script src/app.js --out out/app.js \
+            --sourcemap
+```
+
+---
+
+class: es6
+
+# Traceur
+
+## Integration with build tools
+
+- grunt-traceur
+- gulp-traceur
+
+
+---
+
+class: es6
+
+# What else is new in ES6?
+
+--
+
+## Lots!
+
+https://github.com/lukehoban/es6features
+
+- let + const
+- iterators + for..of
+- generators
+- comprehensions
+- unicode
+- modules
+- module loaders
+- map + set + weakmap + weakset
+- proxies
+- symbols
+- subclassable built-ins
+- promises
+- math + number + string + object APIs
+- binary and octal literals
+- reflect api
+- tail calls
+
+---
+
+class: center, middle, es6
+
+# Demo
+
+---
+
+class: center, middle, es6
+# Questions?
+
+## @andrewdavey
+
+## aboutcode.net
+
+    </textarea>
+    <script src="remark.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
+
